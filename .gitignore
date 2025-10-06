@@ -226,3 +226,6 @@ __marimo__/
 *.vrb
 *.xdv
 *.dvi
+
+# data
+data
