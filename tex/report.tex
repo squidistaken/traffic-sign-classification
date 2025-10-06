@@ -1,0 +1,102 @@
+\documentclass[10pt,a4paper]{article}
+
+% Encoding and fonts
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% Math and symbols
+\usepackage{amsmath, amssymb, amsfonts}
+
+% Graphics and figures
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+% Better referencing
+\usepackage{hyperref}
+\usepackage{cleveref}
+
+% Bibliography
+\usepackage[numbers]{natbib}
+
+% Formatting
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+% Title info
+\title{Semester Project Report \\ \large Neural Networks (AI)}
+\author{
+  Team Members: Alice Example, Bob Example, Carol Example \\
+  University of Groningen
+}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\noindent
+A concise ($\approx$10 lines) summary of the task, dataset, methods, and main results.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+State your project task (given or self-chosen).  
+Briefly describe dataset(s) and objectives.  
+Keep it short, direct, and specific to your project.
+
+\section{Data}
+\begin{itemize}
+  \item Source of dataset
+  \item Size and type (tabular, images, time series…)
+  \item Key characteristics (with plots or descriptive stats)
+  \item Any preprocessing or cleaning
+\end{itemize}
+
+\section{Methods and Experiments}
+\subsection{Pipeline Overview}
+Diagram or list of your full pipeline: preprocessing, model, optimization.  
+
+\subsection{Model Description}
+- Architecture (MLP, CNN, etc.), with math or pseudocode if needed.  
+- Loss function, optimizer, regularization.  
+
+\subsection{Training Procedure}
+- Cross-validation setup, train/test split.  
+- Hyperparameters and how you chose them.  
+
+\section{Results}
+\begin{itemize}
+  \item Performance metrics (accuracy, MSE, etc.)
+  \item Learning curves or confusion matrices
+  \item Compare with baseline(s)
+\end{itemize}
+
+\section{Discussion}
+\begin{itemize}
+  \item What worked well and why
+  \item What didn't work, limitations
+  \item Possible improvements or future work
+\end{itemize}
+
+\section{Conclusion}
+Wrap up: summarize objectives, approach, key findings, and lessons learned.
+
+\section*{References}
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\appendix
+\section{Use of AI Tools}
+Briefly document how (if at all) ChatGPT or other LLMs were used in writing or coding.
+
+\section{Additional Figures / Materials}
+Include extra plots, tables, or examples here if needed.
+
+\end{document}
