@@ -1,4 +1,3 @@
-# resize, center-crop/pad-to-square, normalize, augment
 from typing import Tuple
 import numpy as np
 from PIL import Image
@@ -46,3 +45,6 @@ class Normalize:
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
         return (x - self.mean) / self.std  # assuming x is in [0, 1] range
+
+
+# todo: resize, center-crop/pad-to-square, normalize, augment

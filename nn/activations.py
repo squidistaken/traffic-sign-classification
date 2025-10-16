@@ -1,4 +1,4 @@
-# ReLU, LeakyReLU, Tanh, Sigmoid, Softmax
+# todo: LeakyReLU, Tanh, Sigmoid, Softmax
 
 from typing import Tuple
 

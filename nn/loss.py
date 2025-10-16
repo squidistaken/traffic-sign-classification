@@ -1,6 +1,3 @@
-# CrossEntropy, MSE (for tests)
-# purpose: take logits and targets, return loss and gradients
-
 import numpy as np
 from typing import Tuple
 
@@ -23,3 +20,6 @@ def cross_entropy_with_logits(
     grad[np.arange(n), targets] -= 1
     grad /= n
     return loss, grad
+
+
+# todo: MSE

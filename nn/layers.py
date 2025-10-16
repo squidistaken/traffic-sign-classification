@@ -1,5 +1,3 @@
-# Linear, Conv2D, MaxPool2D, Flatten, BatchNorm2D, Dropout
-
 from abc import ABC, abstractmethod
 from typing import Optional, Tuple
 import numpy as np

@@ -1,6 +1,3 @@
-# mini-batch iterator, shuffling
-# responsibilities: return NCHW batches with labels
-
 import numpy as np
 from typing import Iterator, Callable, List, Optional, Tuple
 from .gtsrb_dataset import GTSRBDataset
