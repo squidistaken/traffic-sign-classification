@@ -8,4 +8,6 @@ dependencies = [
     "requests",
     "numpy",
     "pillow",
+    "logging>=0.4.9.6",
+    "typing>=3.10.0.0",
 ]

@@ -3,48 +3,202 @@ import numpy as np
 from PIL import Image
 
 
-class Compose:
-    def __init__(self, transforms):
+class ToCompose:
+    """The ToCompose Transform Class to combine multiple transforms."""
+    def __init__(self, transforms: Tuple) -> None:
+        """Initialize the Compose transform.
+
+        Args:
+            transforms (Tuple): The tuple of transforms to compose.
+        """
         self.transforms = transforms
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
+        """Call the composed transforms on the input.
+
+        Args:
+            x (np.ndarray): The input image array.
+
+        Returns:
+            np.ndarray: The transformed image array.
+        """
         for t in self.transforms:
             x = t(x)
+
         return x
 
 
-class Resize:
-    def __init__(self, size: int):
+class ToResize:
+    """The ToResize Transform Class to resize images."""
+    def __init__(self, size: int) -> None:
+        """Initialize the Resize transform.
+
+        Args:
+            size (int): The target size to resize the image to.
+        """
         self.size = size
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
+        """Call the resize transform on the input.
+
+        Args:
+            x (np.ndarray): The input image array.
+
+        Returns:
+            np.ndarray: The resized image array.
+        """
         img = Image.fromarray(x)
         img = img.resize((self.size, self.size))
+
         return np.array(img)
 
 
-class ToGrayscale:
+class ToCenterCrop:
+    """The ToCenterCrop Transform Class to crop images to a square."""
+    def __init__(self, size: int) -> None:
+        """Initialize the CenterCrop transform.
+
+        Args:
+            size (int): The target size to crop the image to.
+        """
+        self.size = size
+
     def __call__(self, x: np.ndarray) -> np.ndarray:
+        """Call the CenterCrop transform on the input.
+
+        Args:
+            x (np.ndarray): The input image array.
+
+        Returns:
+            np.ndarray: The cropped image array.
+        """
+        height, width = x.shape[:2]
+        # Calculate the starting points for cropping.
+        start_x = (width - self.size) // 2
+        start_y = (height - self.size) // 2
+        # Crop the image.
+        cropped_img = x[start_y:start_y + self.size,
+                        start_x:start_x + self.size]
+
+        return cropped_img
+
+
+class ToGrayscale:
+    """The ToGrayscale Transform Class to convert images to grayscale."""
+    def __call__(self, x: np.ndarray) -> np.ndarray:
+        """Call the ToGrayscale transform on the input.
+
+        Args:
+            x (np.ndarray): The input image array.
+
+        Returns:
+            np.ndarray: The grayscale image array.
+        """
         img = Image.fromarray(x)
-        img = img.convert("L")  # convert to grayscale
-        img = img.convert("RGB")  # convert back to RGB
+        # Convert to grayscale.
+        img = img.convert("L")
+        # Convert back to RGB, as some models expect 3 channels.
+        # It remains grayscale visually.
+        img = img.convert("RGB")
+
         return np.array(img)
 
 
 class ToTensor:
+    """The ToTensor Transform Class to convert images to tensors."""
     def __call__(self, x: np.ndarray) -> np.ndarray:
-        return x.transpose((2, 0, 1)).astype(np.float32) / 255.0  # HWC to CHW
+        """Call the ToTensor transform on the input.
+
+        Args:
+            x (np.ndarray): The input image array.
+
+        Returns:
+            np.ndarray: The image array as a tensor.
+        """
+        # HWC to CHW
+        return x.transpose((2, 0, 1)).astype(np.float32) / 255.0
 
 
-class Normalize:
+class ToNormalize:
+    """The ToNormalize Transform Class to normalize images."""
     def __init__(
         self, mean: Tuple[float, float, float], std: Tuple[float, float, float]
-    ):
+    ) -> None:
+        """Initialize the Normalize transform.
+
+        Args:
+            mean (Tuple[float, float, float]): The mean for each channel.
+            std (Tuple[float, float, float]): The standard deviation
+                                              for each channel.
+        """
         self.mean = np.array(mean).reshape(3, 1, 1)
         self.std = np.array(std).reshape(3, 1, 1)
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
-        return (x - self.mean) / self.std  # assuming x is in [0, 1] range
+        """Call the Normalize transform on the input.
+
+        Args:
+            x (np.ndarray): The input image array.
+
+        Returns:
+            np.ndarray: The normalized image array.
+        """
+        # We assume x is in [0, 1] range
+        return (x - self.mean) / self.std
 
 
-# todo: resize, center-crop/pad-to-square, normalize, augment
+class ToRotate:
+    """The ToRotate Transform Class to rotate images."""
+    def __init__(self, angle: float) -> None:
+        """Initialize the Rotate transform.
+
+        Args:
+            angle (float): The angle to rotate the image by.
+        """
+        self.angle = angle
+
+    def __call__(self, x: np.ndarray) -> np.ndarray:
+        """Call the Rotate transform on the input.
+
+        Args:
+            x (np.ndarray): The input image array.
+
+        Returns:
+            np.ndarray: The rotated image array.
+        """
+        img = Image.fromarray(x)
+        img = img.rotate(self.angle)
+
+        return np.array(img)
+
+
+class ToFlip:
+    """The Flip Transform Class to flip images."""
+    def __init__(self, horizontal: bool = False, vertical: bool = False
+                 ) -> None:
+        """Initialize the Flip transform.
+
+        Args:
+            horizontal (bool): Whether to flip the image horizontally.
+            vertical (bool): Whether to flip the image vertically.
+        """
+        self.horizontal = horizontal
+        self.vertical = vertical
+
+    def __call__(self, x: np.ndarray) -> np.ndarray:
+        """Call the Flip transform on the input.
+
+        Args:
+            x (np.ndarray): The input image array.
+
+        Returns:
+            np.ndarray: The flipped image array.
+        """
+        img = Image.fromarray(x)
+
+        if self.horizontal:
+            img = img.transpose(Image.FLIP_LEFT_RIGHT)
+        if self.vertical:
+            img = img.transpose(Image.FLIP_TOP_BOTTOM)
+
+        return np.array(img)
