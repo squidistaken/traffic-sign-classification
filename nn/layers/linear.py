@@ -1,6 +1,6 @@
 import numpy as np
 from typing import Optional
-from .base_layer import Layer
+from .base_layers import Layer
 
 
 class Linear(Layer):

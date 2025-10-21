@@ -1,4 +1,4 @@
-from .base_layer import Layer
+from .base_layers import Layer
 from typing import Optional
 import numpy as np
 
@@ -58,7 +58,7 @@ class Dropout(Layer):
             np.ndarray: The downstream gradient.
         """
         if self.mask is not None:
-            return dout * self.mask / (1 - self.p)
+            return dout * self.mask
         else:
             # There is no dropout mask stored, so just pass the gradient
             # through.

@@ -1,24 +1,19 @@
-from abc import ABC, abstractmethod
+from .base_layers import Layer
 import numpy as np
 
 
-# TODO: Conv2D, MaxPool2D, BatchNorm2D, GlobalAvgPool2D, Sequential
-class Layer(ABC):
-    """
-    Abstract Base Class for Layers.
-    NP arrays are expected in NCHW format.
-    """
-
-    def __init__(self, name: str = None) -> None:
-        """
-        Initialize layer parameters and gradients.
+class Sequential(Layer):
+    """The Sequential Layer, which chains multiple layers together."""
+    def __init__(self, layers: list[Layer]):
+        """Initialize Sequential layer.
 
         Args:
-            name (str, optional): The name of the layer. Defaults to None.
+            layers (list[Layer]): The list of layers to chain.
         """
-        self.name = name
+        super().__init__()
 
-    @abstractmethod
+        self.layers = layers
+
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
         """
         Perform the forward pass of the layer.
@@ -31,9 +26,11 @@ class Layer(ABC):
         Returns:
             np.ndarray: The output of the layer.
         """
-        pass
+        for layer in self.layers:
+            x = layer.forward(x, training)
 
-    @abstractmethod
+        return x
+
     def backward(self, dout: np.ndarray) -> np.ndarray:
         """
         Perform the backward pass of the layer.
@@ -44,9 +41,11 @@ class Layer(ABC):
         Returns:
             np.ndarray: The downstream gradient.
         """
-        pass
+        for layer in reversed(self.layers):
+            dout = layer.backward(dout)
 
-    @abstractmethod
+        return dout
+
     def params(self) -> list[np.ndarray]:
         """
         Define the parameters of the layer.
@@ -54,9 +53,13 @@ class Layer(ABC):
         Returns:
             list[np.ndarray]: The list of parameters.
         """
-        pass
+        params = []
 
-    @abstractmethod
+        for layer in self.layers:
+            params.extend(layer.params())
+
+        return params
+
     def grads(self) -> list[np.ndarray]:
         """
         Define the gradients of the layer.
@@ -64,9 +67,13 @@ class Layer(ABC):
         Returns:
             list[np.ndarray]: The list of gradients.
         """
-        pass
+        grads = []
 
-    @abstractmethod
+        for layer in self.layers:
+            grads.extend(layer.grads())
+
+        return grads
+
     def output_shape(self, input_shape: tuple) -> tuple:
         """
         Compute the output shape given the input shape.
@@ -77,4 +84,9 @@ class Layer(ABC):
         Returns:
             tuple: The shape of the output.
         """
-        pass
+        shape = input_shape
+
+        for layer in self.layers:
+            shape = layer.output_shape(shape)
+
+        return shape
