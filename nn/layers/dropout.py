@@ -8,6 +8,7 @@ class Dropout(Layer):
     The Dropout Layer, which randomly sets a fraction p of input units to
     zero.
     """
+
     def __init__(self, p: float = 0.5):
         """Initialize Dropout layer.
 
@@ -36,8 +37,7 @@ class Dropout(Layer):
         if training:
             # Create dropout mask, and scale the activations to keep expected
             # value the same.
-            self.mask = (
-                np.random.rand(*x.shape) >= self.p).astype(np.float32) / (
+            self.mask = (np.random.rand(*x.shape) >= self.p).astype(np.float32) / (
                 1.0 - self.p
             )
             y = x * self.mask

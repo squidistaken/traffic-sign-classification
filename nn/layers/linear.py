@@ -8,9 +8,14 @@ class Linear(Layer):
     The Linear (Fully Connected) Layer, which performs an affine
     transformation on the input data.
     """
-    def __init__(self, in_features: int, out_features: int,
-                 W: Optional[np.ndarray] = None,
-                 b: Optional[np.ndarray] = None) -> None:
+
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        W: Optional[np.ndarray] = None,
+        b: Optional[np.ndarray] = None,
+    ) -> None:
         """
         Initialize the Linear layer. If the weight matrix W or bias b
         are not provided, they are initialized randomly.
@@ -72,7 +77,7 @@ class Linear(Layer):
             np.ndarray: The downstream gradient.
         """
         # Ensure that forward has been called.
-        assert (self.cache_x is not None), "Must call forward before backward!"
+        assert self.cache_x is not None, "Must call forward before backward!"
 
         x = self.cache_x
 

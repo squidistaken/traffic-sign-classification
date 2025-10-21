@@ -3,7 +3,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
 from typing import Tuple, Dict, Any
-from .layers import Layer
+from .layers.base_layer import Layer
 
 
 class Optimizer(ABC):

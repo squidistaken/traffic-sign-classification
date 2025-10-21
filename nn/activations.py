@@ -3,8 +3,9 @@ from typing import Tuple, Union
 
 
 # region Forward Pass Activations
-def relu(x: Union[float, np.ndarray], alpha: float = 0.0
-         ) -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]:
+def relu(
+    x: Union[float, np.ndarray], alpha: float = 0.0
+) -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]:
     """
     Compute the forward pass and gradient of the Rectified Linear Unit (ReLU)
     activation function. If alpha is non-zero, it behaves like a Leaky ReLU.
@@ -36,8 +37,9 @@ def relu(x: Union[float, np.ndarray], alpha: float = 0.0
     return output, grad
 
 
-def tanh(x: Union[float, np.ndarray]
-         ) -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]:
+def tanh(
+    x: Union[float, np.ndarray],
+) -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]:
     """
     Compute the forward pass and gradient of the Tanh activation function.
 
@@ -54,13 +56,14 @@ def tanh(x: Union[float, np.ndarray]
                                                                    at x.
     """
     output = np.tanh(x)
-    grad = 1 - output ** 2
+    grad = 1 - output**2
 
     return output, grad
 
 
-def sigmoid(x: Union[float, np.ndarray]
-            ) -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]:
+def sigmoid(
+    x: Union[float, np.ndarray],
+) -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]:
     """
     Compute the forward pass and gradient of the Sigmoid activation function.
 
@@ -102,12 +105,15 @@ def softmax(x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     grad = output * (1 - output)
 
     return output, grad
+
+
 # endregion
 
 
 # region Backward Pass Activations
-def backward_pass(dout: Union[float, np.ndarray],
-                  grad: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+def backward_pass(
+    dout: Union[float, np.ndarray], grad: Union[float, np.ndarray]
+) -> Union[float, np.ndarray]:
     """
     Compute the backward pass for any given activation function.
 
@@ -122,4 +128,6 @@ def backward_pass(dout: Union[float, np.ndarray],
                                   input.
     """
     return dout * grad
+
+
 # endregion

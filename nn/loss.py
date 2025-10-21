@@ -2,8 +2,7 @@ import numpy as np
 from typing import Tuple
 
 
-def cross_entropy(logits: np.ndarray, targets: np.ndarray
-                  ) -> Tuple[float, np.ndarray]:
+def cross_entropy(logits: np.ndarray, targets: np.ndarray) -> Tuple[float, np.ndarray]:
     """Perform a cross-entropy loss calculation for a batch of logits and
     target labels.
 
@@ -47,8 +46,7 @@ def mse(logits: np.ndarray, targets: np.ndarray) -> Tuple[float, np.ndarray]:
     return loss, grad
 
 
-def hinge_loss(logits: np.ndarray, targets: np.ndarray
-               ) -> Tuple[float, np.ndarray]:
+def hinge_loss(logits: np.ndarray, targets: np.ndarray) -> Tuple[float, np.ndarray]:
     """Perform hinge loss calculation for a batch of logits and target labels.
 
     Args:

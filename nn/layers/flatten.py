@@ -7,11 +7,12 @@ class Flatten(Layer):
     """The Flatten Layer, which reshapes the input tensor
     from (B, C, H, W) to (B, C*H*W).
     """
+
     def __init__(self):
         """Initialize Flatten layer."""
         # Store input shape for backward pass.
         super().__init__()
-        self.cache_shape: Optional[Tuple[int, int, int, int]] = (None)
+        self.cache_shape: Optional[Tuple[int, int, int, int]] = None
 
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
         """
@@ -41,8 +42,7 @@ class Flatten(Layer):
             np.ndarray: The downstream gradient.
         """
         # Ensure that forward has been called.
-        assert (self.cache_shape is not None
-                ), "Must call forward before backward!"
+        assert self.cache_shape is not None, "Must call forward before backward!"
 
         B, C, H, W = self.cache_shape
         # Unflatten the gradient to the original input shape.

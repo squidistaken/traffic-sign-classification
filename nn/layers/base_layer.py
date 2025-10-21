@@ -8,6 +8,7 @@ class Layer(ABC):
     Abstract Base Class for Layers.
     NP arrays are expected in NCHW format.
     """
+
     def __init__(self, name: str = None) -> None:
         """
         Initialize layer parameters and gradients.
