@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO,
 BASE_URL = (
     "https://sid.erda.dk/public/archives/daaeac0d7ce1152aea9b61d9f1e19370/"
 )
-DATA_DIR = "data/gtsrb/"
+DATA_DIR = "../data/gtsrb/"
 ZIPS = [
     "GTSRB_Final_Training_Images",
     "GTSRB_Final_Test_Images",

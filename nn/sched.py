@@ -1,124 +1,141 @@
-# StepLR, Cosine, Warmup
-from math import pi, cos
+import numpy as np
+from abc import ABC, abstractmethod
+from typing import Union, List
+
+
+class LRScheduler(ABC):
+    """Abstract Base Class for Learning Rate Schedulers"""
+    @abstractmethod
+    def get_lr(self, curr_epoch: int) -> float:
+        """
+        Get the learning rate for the current epoch.
+
+        Args:
+            curr_epoch (int): The current epoch number.
+
+        Returns:
+            float: The learning rate.
+        """
+        pass
+
+    def __call__(self, curr_epoch: int) -> float:
+        return self.get_lr(curr_epoch)
+
+    def get_lrs(self, epochs: Union[List[int], np.ndarray]) -> np.ndarray:
+        """
+        Get the learning rates for the given epochs.
+
+        Args:
+            epoch (Union[List[int], np.ndarray]): The list or array of epoch
+                                                  numbers.
+
+        Returns:
+            np.ndarray: The array of learning rates.
+        """
+        return np.array([self.get_lr(epoch) for epoch in epochs])
 
 
 # region Step LR Scheduler
-class StepLRScheduler:
-    def __init__(self, base_lr: float, step_size: int,
-                 gamma: float = 0.1) -> None:
-        """ Step learning rate scheduler.
+class StepLRScheduler(LRScheduler):
+    """The Step Learning Rate Scheduler class."""
+    def __init__(self, base_lr: float, step_size: int, gamma: float = 0.1
+                 ) -> None:
+        """
+        Initialise the step learning rate scheduler class.
 
         Args:
-            base_lr (float): Learning rate at the start of training.
-            step_size (int): Amount of epochs between learning rate decay.
-            gamma (float): Multiplicative factor of decay. Defaults to 0.1.
+            base_lr (float): The learning rate at the start of training.
+            step_size (int): The amount of epochs between learning rate decay.
+            gamma (float, optional): The multiplicative factor of decay.
+                                     Defaults to 0.1.
         """
         self.base_lr = base_lr
         self.step_size = step_size
         self.gamma = gamma
 
     def get_lr(self, curr_epoch: int) -> float:
-        """ Returns decayed learning rate for the current epoch.
+        """
+        Get the learning rate for the current epoch.
 
         Args:
-            curr_epoch (int): Number of current epoch.
+            curr_epoch (int): The current epoch number.
 
         Returns:
-            float: Decayed learning rate.
+            float: The learning rate.
         """
         # For every decay step, multiply base lr by gamma
         amount_of_steps = curr_epoch // self.step_size
-        return self.base_lr * (self.gamma ** amount_of_steps)
+        lr = self.base_lr * (self.gamma ** amount_of_steps)
 
-    def __call__(self, curr_epoch: int) -> float:
-        """ Callable class method for getting learning rate.
-        Shortcut for class method get_lr.
-
-        Args:
-            curr_epoch (int): Number of current epoch.
-
-        Returns:
-            float: Decayed learning rate.
-        """
-        return self.get_lr(curr_epoch)
+        return lr
 # endregion
 
 
 # region Cosine LR Scheduler
-class CosineLRScheduler:
-    def __init__(self, base_lr: float, lowest_lr: float,
-                 total_epochs: int) -> None:
-        """ Initialization of cosine annealer class. This
-        class slowly reduces the learning rate using cosine curves.
+class CosineLRScheduler(LRScheduler):
+    """
+    The Cosine Learning Rate/Annealer class, which slowly reduces the learning
+    rate using cosine curves.
+    """
+    def __init__(self, base_lr: float, lowest_lr: float, total_epochs: int
+                 ) -> None:
+        """
+        Initialise the cosine annealer class.
 
         Args:
-            base_lr (float): Learning rate at the start of training.
-            lowest_lr (float): Lowest value the learning rate can become.
-            total_epochs (int): Total amount of training epochs.
+            base_lr (float): The learning rate at the start of training.
+            lowest_lr (float): The minimum value the learning rate can reach.
+            total_epochs (int): The total amount of training epochs.
         """
         self.base_lr = base_lr
         self.lowest_lr = lowest_lr
         self.total_epochs = total_epochs
 
     def get_lr(self, curr_epoch: int) -> float:
-        """ Returns cosine annealed learning rate for current epoch.
+        """Get the learning rate for the current epoch.
 
         Args:
-            curr_epoch (int): Number of current epoch.
+            curr_epoch (int): The current epoch number.
 
         Returns:
-            float: Annealed learning rate.
+            float: The learning rate.
         """
         lr = (
             self.lowest_lr + 0.5 * (self.base_lr - self.lowest_lr) *
-            (1 + cos(pi * curr_epoch / self.total_epochs))
+            (1 + np.cos(np.pi * curr_epoch / self.total_epochs))
         )
+
         return lr
-
-    def __call__(self, curr_epoch: int) -> float:
-        """ Callable class method for getting learning rate.
-        Shortcut for class method get_lr.
-
-        Args:
-            curr_epoch (int): Number of current epoch.
-
-        Returns:
-            float: Annealed learning rate.
-        """
-        return self.get_lr(curr_epoch)
 # endregion
 
 
 # region Warmup LR Scheduler
-class WarmupLRScheduler:
+class WarmupLRScheduler(LRScheduler):
+    """The Warmup Learning Rate Scheduler class."""
     def __init__(self, base_lr: float, warmup_epochs: int,
                  post_sched: callable | None = None) -> None:
-        """ Initialization of warmup learning rate scheduler.
-        This class gradually increases the learning rate over
-        a set amount of epochs.
+        """Initialise the warmup learning rate scheduler class.
 
         Args:
-            base_lr (float): Learning rate at the start of training.
-            warmup_epochs (int): Amount of epochs it takes for the learning
-                                 rate to increase to base_lr.
-            post_sched (callable | None): Additional scheduler for getting the
-                                          learning rate after warmup finishes.
-                                          Defaults to None and will return the
-                                          base learning rate.
+            base_lr (float): The learning rate at the start of training.
+            warmup_epochs (int): The amount of epochs it takes for the learning
+                                 rate to increase to the base learning rate.
+            post_sched (callable | None, optional):
+                The additional scheduler for getting the learning rate after
+                the warmup finishes. Defaults to None.
         """
         self.base_lr = base_lr
         self.warmup_epochs = warmup_epochs
         self.scheduler = post_sched
 
     def get_lr(self, curr_epoch: int) -> float:
-        """ Returns gradually increased learning rate given
-        the current epoch.
+        """Get the learning rate for the current epoch.
 
         Args:
-            curr_epoch (int): Number of current epoch.
+            curr_epoch (int): The current epoch number.
 
         Returns:
-            float: Gradually increased learning rate.
+            float: The learning rate.
         """
         if curr_epoch < self.warmup_epochs:
             lr = self.base_lr * (curr_epoch / self.warmup_epochs)
@@ -127,17 +144,6 @@ class WarmupLRScheduler:
                 lr = self.scheduler(curr_epoch - self.warmup_epochs)
             else:
                 lr = self.base_lr
+
         return lr
-
-    def __call__(self, curr_epoch: int) -> float:
-        """ Callable class method for getting learning rate.
-        Shortcut for class method get_lr.
-
-        Args:
-            curr_epoch (int): Number of current epoch.
-
-        Returns:
-            float: Annealed learning rate.
-        """
-        return self.get_lr(curr_epoch)
 # endregion

@@ -1,77 +1,66 @@
-# SGD, Momentum, Adam
 import numpy as np
 from abc import ABC, abstractmethod
 from typing import Tuple, Dict, Any
-from .layers.base_layer import Layer
+from layers.base_layers import Layer
 
 
 # region Abstract Optimizer
 class Optimizer(ABC):
-    """Abstract base class for all optimizers."""
-
-    def __init__(
-        self,
-        raw_params: list[Tuple[Layer, str, np.ndarray]] | list[Dict],
-        lr: float = 0.001,
-        weight_decay: float = 0.0,
-    ) -> None:
-        """Initialization of base Optimizer class.
+    """Abstract Base Class for Optimisers"""
+    def __init__(self,
+                 raw_params: list[Tuple[Layer, str, np.ndarray]] | list[Dict],
+                 lr: float = 0.001, weight_decay: float = 0.0,) -> None:
+        """Initialise the Optimiser class.
 
         Args:
-            raw_params (list[Tuple[Layer, str, np.ndarray]] | list[Dict]):
-                Either:
-                - An iterable of triples (layer, name, array) where layer is a
-                Layer instance, name is the parameter name (str),
-                and array is the parameter tensor (np.ndarray),
-                - OR a list of 'param groups': dicts with parameters and
-                per-group hyperparameters
-            lr (float): Learning rate. Defaults to 0.001.
-            weight_decay (float): Weight decay (L2 penalty).
-                                  Defaults to 0.0.
+            raw_params (list[Tuple[Layer, str, np.ndarray]] | list[Dict]): The
+                - iterable of triples (layer, name, array); or
+                - list of parameter groups.
+            lr (float, optional): The learning rate. Defaults to 0.001.
+            weight_decay (float, optional): The weight decay (L2 penalty).
+                                            Defaults to 0.0.
         """
-        self.param_groups = self._make_param_groups(
-            raw_params, lr, weight_decay
-        )
-        self.state = {}  # per-parameter state dictionaries
+        self.param_groups = self._make_param_groups(raw_params, lr,
+                                                    weight_decay)
+        # Per-parameter state dictionaries
+        self.state = {}
 
     @abstractmethod
     def step(self) -> None:
-        """Abstract method for single optimization step."""
+        """Perform a single optimisation step."""
         pass
 
     def zero_grad(self) -> None:
-        """Sets all parameter gradients to zero."""
+        """Set all parameter gradients to zero."""
         for group in self.param_groups:
             for layer, name, param in group["params"]:
                 grad = getattr(layer, "grad_" + name)
                 grad.fill(0.0)
 
     def _make_param_groups(
-        self,
-        raw_params: list[Tuple[Layer, str, np.ndarray]] | list[Dict],
-        lr: float,
-        weight_decay: float,
-    ) -> list[Dict[str, Any]]:
-        """
-        Turns the two types of raw_params inputs
-        into a standardized structure.
+            self,
+            raw_params: list[Tuple[Layer, str, np.ndarray]] | list[Dict],
+            lr: float,
+            weight_decay: float) -> list[Dict[str, Any]]:
+        """Turn the raw parameters inputs into a standardised structure.
 
         Args:
             raw_params (list[Tuple[Layer, str, np.ndarray]] | list[Dict]):
-                Either:
-                - An iterable of triples (layer, name, array) where layer is a
-                Layer instance, name is the parameter name (str),
-                and array is the parameter tensor (np.ndarray),
-                - OR a list of 'param groups': dicts with parameters and
-                per-group hyperparameters
-            lr (float): Learning rate.
-            weight_decay (float): Weight decay (L2 penalty).
+                The
+                - iterable of triples (layer, name, array); or
+                - list of parameter groups.
+            lr (float): The learning rate.
+            weight_decay (float): The weight decay (L2 penalty).
+
+        Raises:
+            ValueError: If the parameters are not an iterable of triples or
+                        list of parameter groups.
+            ValueError: If the parameter group is not a list.
 
         Returns:
-            list[Dict[str, Any]]: List of parameter groups in
-                                  a standardized structure.
+            list[Dict[str, Any]]: The list of parameter groups in a
+                                  standaradised structure.
         """
-
         param_groups = []
 
         # Handle both possible cases of argument params,
@@ -96,13 +85,13 @@ class Optimizer(ABC):
             else:
                 raise ValueError(
                     (
-                        "Params must be a list of an iterable of triples "
+                        "Parameters must be a list of an iterable of triples "
                         "(layer, name, array) tuples "
                         "OR a list of parameter group dictionaries."
                     )
                 )
         else:
-            raise ValueError("Params must be a list")
+            raise ValueError("Parameters must be a list.")
 
         return param_groups
 # endregion
@@ -110,11 +99,9 @@ class Optimizer(ABC):
 
 # region SGD Optimizer
 class SGD(Optimizer):
-    """Implements stochastic gradient descent optimizer."""
-
+    """The Stochastic Gradient Descent optimiser class."""
     def step(self) -> None:
-        """Performs a single optimization step."""
-
+        """Perform a single optimisation step."""
         for group in self.param_groups:
             lr = group["lr"]
             weight_decay = group["weight_decay"]
@@ -128,28 +115,31 @@ class SGD(Optimizer):
                     # Skip unnecessary computations if there's no weight decay.
                     upd = grad
 
-                # theta = theta - lr * (grad + weight_decay * theta)
+                # theta = theta - lr * (grad + weight_decay * theta).
                 parameters -= lr * upd
 # endregion
 
 
 # region Adam Optimizer
 class Adam(Optimizer):
-    """Implements the Adam optimizer."""
+    """The Adam optimiser class."""
 
     def step(self) -> None:
-        """Performs a single optimization step."""
+        """Perform a single optimisation step."""
         for group in self.param_groups:
             lr = group["lr"]
             weight_decay = group["weight_decay"]
-            # Get Adam specific parameters from group, else default
+            # Get the Adam specific parameters from group, else get the
+            # default.
+
             beta1 = group.get("beta1", 0.9)
             beta2 = group.get("beta2", 0.999)
             epsilon = group.get("epsilon", 1e-8)
 
             for layer, name, parameters in group["params"]:
                 grad = getattr(layer, "grad_" + name)
-                # Apply weight decay if not zero
+
+                # Apply weight decay if it is not zero.
                 if weight_decay != 0:
                     grad = grad + weight_decay * parameters
 
@@ -167,7 +157,6 @@ class Adam(Optimizer):
                 # Update biased moment estimates
                 t += 1
                 state["t"] = t
-
                 m[:] = beta1 * m + (1 - beta1) * grad
                 v[:] = beta2 * v + (1 - beta2) * (grad ** 2)
 
@@ -183,19 +172,21 @@ class Adam(Optimizer):
 
 # region Momentum Optimizer
 class Momentum(Optimizer):
-    """Implements the Momentum optimizer."""
+    """The Momentum optimiser class."""
 
     def step(self) -> None:
-        """Performs a single optimization step."""
+        """Perform a single optimization step."""
         for group in self.param_groups:
             lr = group["lr"]
             weight_decay = group["weight_decay"]
-            # Get parameters specific to Momentum or default
+
+            # Get the parameters specific to Momentum or the default.
             momentum = group.get("momentum", 0.9)
 
             for layer, name, parameters in group["params"]:
                 grad = getattr(layer, "grad_" + name)
-                # Apply weight decay if not zero
+
+                # Apply weight decay if it is not zero.
                 if weight_decay != 0:
                     grad = grad + weight_decay * parameters
 
@@ -208,9 +199,9 @@ class Momentum(Optimizer):
                 state = self.state[(layer, name)]
                 v = state["v"]
 
-                # Update velocity
+                # Update the velocity.
                 v[:] = momentum * v + grad
 
-                # Parameter update
+                # Update parameters.
                 parameters -= lr * v
 # endregion

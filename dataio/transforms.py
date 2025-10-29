@@ -172,33 +172,33 @@ class ToRotate:
         return np.array(img)
 
 
-class ToFlip:
-    """The Flip Transform Class to flip images."""
-    def __init__(self, horizontal: bool = False, vertical: bool = False
-                 ) -> None:
-        """Initialize the Flip transform.
+class ToNoise:
+    """The ToNoise Transform Class to add Gaussian noise to images."""
+    def __init__(self, mean=0, std=0.1):
+        """
+        Initialize the Noise transform.
 
         Args:
-            horizontal (bool): Whether to flip the image horizontally.
-            vertical (bool): Whether to flip the image vertically.
+            mean (float): The mean of the Gaussian noise.
+            std (float): The standard deviation of the Gaussian noise.
         """
-        self.horizontal = horizontal
-        self.vertical = vertical
+        self.mean = mean
+        self.std = std
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
-        """Call the Flip transform on the input.
+        """
+        Call the Noise transform on the input.
 
         Args:
             x (np.ndarray): The input image array.
 
         Returns:
-            np.ndarray: The flipped image array.
+            np.ndarray: The noisy image array.
         """
-        img = Image.fromarray(x)
-
-        if self.horizontal:
-            img = img.transpose(Image.FLIP_LEFT_RIGHT)
-        if self.vertical:
-            img = img.transpose(Image.FLIP_TOP_BOTTOM)
-
-        return np.array(img)
+        # Generate Gaussian noise with the same shape as the input image
+        noise = np.random.normal(self.mean, self.std, x.shape)
+        # Add the noise to the image
+        noisy_img = x + noise
+        # Clip the values to ensure they are within the valid range
+        noisy_img = np.clip(noisy_img, 0, 1)
+        return noisy_img
