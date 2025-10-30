@@ -6,7 +6,7 @@ import numpy as np
 class BatchNorm2D(Layer2D):
     """The BatchNorm2D Layer, which performs 2D batch normalization."""
     def __init__(self, num_channels: int, momentum: float = 0.9,
-                 epsilon: float = 1e-5) -> None:
+                 epsilon: float = 1e-5, name: str = "BatchNorm2D") -> None:
         """Initialize the BatchNorm2D layer.
 
         Args:
@@ -16,7 +16,7 @@ class BatchNorm2D(Layer2D):
             epsilon (float, optional): The small constant to avoid division by
                                        zero. Defaults to 1e-5.
         """
-        super().__init__(stride=1, padding=0)
+        super().__init__(name)
         self.num_channels = num_channels
         self.momentum = momentum
         self.epsilon = epsilon
@@ -80,10 +80,8 @@ class BatchNorm2D(Layer2D):
     def backward(self, dout: np.ndarray) -> np.ndarray:
         """
         Perform the backward pass of the layer.
-
         Args:
             dout (np.ndarray): The upstream gradient.
-
         Returns:
             np.ndarray: The downstream gradient.
         """
@@ -92,21 +90,19 @@ class BatchNorm2D(Layer2D):
         mean = self.cache['mean']
         var = self.cache['var']
         N, C, H, W = x.shape
-
         # Compute gradients.
         self.dgamma = np.sum(dout * x_norm, axis=(0, 2, 3))
         self.dbeta = np.sum(dout, axis=(0, 2, 3))
         dx_norm = dout * self.gamma.reshape(1, C, 1, 1)
         dvar = np.sum(dx_norm * (x - mean.reshape(1, C, 1, 1)) *
-                      -0.5 * (var.reshape(1, C, 1, 1) + self.epsilon) ** -1.5,
-                      axis=(0, 2, 3))
+                    -0.5 * (var.reshape(1, C, 1, 1) + self.epsilon) ** -1.5,
+                    axis=(0, 2, 3))
         dmean = (np.sum(dx_norm * -1 /
-                        np.sqrt(var.reshape(1, C, 1, 1) + self.eps),
+                        np.sqrt(var.reshape(1, C, 1, 1) + self.epsilon),
                         axis=(0, 2, 3)) + dvar * -2 * np.mean(
                             x - mean.reshape(1, C, 1, 1), axis=(0, 2, 3)))
-        dx = (dx_norm / np.sqrt(var.reshape(1, C, 1, 1) + self.eps) +
-              dvar * 2 * (x - mean.reshape(1, C, 1, 1)) / N + dmean / N)
-
+        dx = (dx_norm / np.sqrt(var.reshape(1, C, 1, 1) + self.epsilon) +
+            dvar.reshape(1, C, 1, 1) * 2 * (x - mean.reshape(1, C, 1, 1)) / N + dmean.reshape(1, C, 1, 1) / N)
         return dx
 
     def params(self) -> list[np.ndarray]:

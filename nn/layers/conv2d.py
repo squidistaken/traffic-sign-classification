@@ -7,7 +7,7 @@ from ..utils import image_to_column, column_to_image
 class Conv2D(Layer2D):
     """The Conv2D Layer, which performs a 2D convolution operation."""
     def __init__(self, in_channels: int, out_channels: int, kernel_size: int,
-                 stride: int = 1, padding: int = 0) -> None:
+                 stride: int = 1, padding: int = 0, name: str = "Conv2D") -> None:
         """Initialize Conv2D layer.
 
         Args:
@@ -19,7 +19,7 @@ class Conv2D(Layer2D):
             padding (int, optional): Zero-padding added to both sides of the
                                      input. Defaults to 0.
         """
-        super().__init__(stride, padding)
+        super().__init__(stride, padding, name)
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size

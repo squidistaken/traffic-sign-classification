@@ -15,6 +15,7 @@ class Linear(Layer):
         out_features: int,
         W: Optional[np.ndarray] = None,
         b: Optional[np.ndarray] = None,
+        name: str = "Linear"
     ) -> None:
         """
         Initialize the Linear layer. If the weight matrix W or bias b
@@ -28,7 +29,7 @@ class Linear(Layer):
             b (Optional[np.ndarray], optional): The bias vector.
                                                 Defaults to None.
         """
-        super().__init__()
+        super().__init__(name)
 
         if W is None:
             # The initialization uses He initialization for weights. This is

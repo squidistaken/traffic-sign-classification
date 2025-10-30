@@ -8,10 +8,10 @@ class Flatten(Layer):
     from (B, C, H, W) to (B, C*H*W).
     """
 
-    def __init__(self):
+    def __init__(self, name: str = "Flatten") -> None:
         """Initialize Flatten layer."""
         # Store input shape for backward pass.
-        super().__init__()
+        super().__init__(name)
         self.cache_shape: Optional[Tuple[int, int, int, int]] = None
 
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:

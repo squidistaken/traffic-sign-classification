@@ -4,13 +4,13 @@ import numpy as np
 
 class Sequential(Layer):
     """The Sequential Layer, which chains multiple layers together."""
-    def __init__(self, layers: list[Layer]):
+    def __init__(self, layers: list[Layer], name: str = "Sequential"):
         """Initialize Sequential layer.
 
         Args:
             layers (list[Layer]): The list of layers to chain.
         """
-        super().__init__()
+        super().__init__(name)
 
         self.layers = layers
 

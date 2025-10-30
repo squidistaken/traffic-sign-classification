@@ -1,7 +1,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
 from typing import Tuple, Dict, Any
-from layers.base_layers import Layer
+from .layers.base_layers import Layer
 
 
 # region Abstract Optimizer

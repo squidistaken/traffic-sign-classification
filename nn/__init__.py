@@ -6,7 +6,7 @@ from .optim import SGD, Adam, Momentum
 from .sched import StepLRScheduler, WarmupLRScheduler, CosineLRScheduler
 from .utils import (image_to_column, column_to_image, one_hot_encode,
                     compute_accuracy)
-from .model import Model
+from . import layers
 import numpy as np
 
 
@@ -62,5 +62,5 @@ __all__ = [
     "column_to_image",
     "one_hot_encode",
     "compute_accuracy",
-    "Model"
+    "layers",
 ]

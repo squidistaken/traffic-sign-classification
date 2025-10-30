@@ -5,9 +5,9 @@ from typing import Optional
 
 class GlobalAvgPool2D(Layer2D):
     """The GlobalAvgPool2D Layer, which performs global average pooling."""
-    def __init__(self) -> None:
+    def __init__(self, name: str = "GlobalAvgPool2D") -> None:
         """Initialize the GlobalAvgPool2D layer."""
-        super().__init__(stride=1, padding=0)
+        super().__init__(name, stride=1, padding=0)
 
         # Cache for backward pass.
         self.cache: Optional[dict] = None

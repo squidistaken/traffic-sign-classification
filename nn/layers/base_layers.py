@@ -8,7 +8,7 @@ class Layer(ABC):
     """
     Abstract Base Class for Layers. NP arrays are expected in NCHW format.
     """
-    def __init__(self, name: str = None) -> None:
+    def __init__(self, name: str = "Layer") -> None:
         """
         Initialize layer parameters and gradients.
 
@@ -85,7 +85,7 @@ class Layer2D(Layer):
     """
     Abstract Base Class for 2D Layers. NP arrays are expected in NCHW format.
     """
-    def __init__(self, stride: int = 1, padding: int = 0) -> None:
+    def __init__(self, stride: int = 1, padding: int = 0, name: str = "Layer2D") -> None:
         """
         Initialize the 2D layer.
 
@@ -93,7 +93,7 @@ class Layer2D(Layer):
             stride (int, optional): The stride of the layer. Defaults to 1.
             padding (int, optional): The padding of the layer. Defaults to 0.
         """
-        super().__init__()
+        super().__init__(name)
         self.stride = stride
         self.padding = padding
 

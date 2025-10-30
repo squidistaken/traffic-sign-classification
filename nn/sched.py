@@ -1,6 +1,6 @@
 import numpy as np
 from abc import ABC, abstractmethod
-from typing import Union, List
+from typing import Callable, Union, List
 
 
 class LRScheduler(ABC):
@@ -113,7 +113,7 @@ class CosineLRScheduler(LRScheduler):
 class WarmupLRScheduler(LRScheduler):
     """The Warmup Learning Rate Scheduler class."""
     def __init__(self, base_lr: float, warmup_epochs: int,
-                 post_sched: callable | None = None) -> None:
+                 post_sched: Callable | None = None) -> None:
         """Initialise the warmup learning rate scheduler class.
 
         Args:

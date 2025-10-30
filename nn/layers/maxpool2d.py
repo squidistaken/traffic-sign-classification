@@ -7,7 +7,7 @@ from ..utils import image_to_column, column_to_image
 class MaxPool2D(Layer2D):
     """The MaxPool2D Layer, which performs 2D max pooling."""
     def __init__(self, pool_size: int, stride: int = 1,
-                 padding: int = 0) -> None:
+                 padding: int = 0, name: str = "MaxPool2D") -> None:
         """Initialize the MaxPool2D layer.
 
         Args:
@@ -20,7 +20,7 @@ class MaxPool2D(Layer2D):
         """
         if stride is None:
             stride = pool_size
-        super().__init__(stride, padding)
+        super().__init__(stride, padding, name)
         self.pool_size = pool_size
 
         # Cache for the backward pass.
@@ -65,37 +65,41 @@ class MaxPool2D(Layer2D):
 
     def backward(self, dout: np.ndarray) -> np.ndarray:
         """
-        Perform the backward pass of the layer.
-
+        Perform the backward pass of the MaxPool2D layer.
         Args:
-            dout (np.ndarray): The upstream gradient.
-
+            dout (np.ndarray): The upstream gradient of shape (N, C, out_H, out_W).
         Returns:
-            np.ndarray: The downstream gradient.
+            np.ndarray: The downstream gradient of shape (N, C, H, W).
         """
         x = self.cache["x"]
-        cols = self.cache["cols"]
         cols_reshaped = self.cache["cols_reshaped"]
         N, C, H, W = x.shape
-        _, _, out_H, out_W = cols_reshaped.shape
+        pool_h = self.pool_size
+        pool_w = self.pool_size  # Assuming square pooling window
+        stride = self.stride
+        padding = self.padding
+        N, C, out_H, out_W, _, _ = cols_reshaped.shape
 
-        # Reshape the upstream gradient to match the columns shape.
-        dout_reshaped = dout.reshape(N, C, out_H * out_W)
+        # Initialize the output gradient
+        dx = np.zeros((N, C, H + 2 * padding, W + 2 * padding))
 
-        # Initialize the gradient for the columns.
-        dcols = np.zeros_like(cols)
-
-        # Compute the gradient with respect to the input columns.
+        # For each position in the output
         for n in range(N):
             for c in range(C):
-                for i in range(out_H * out_W):
-                    col = cols_reshaped[n, c, i // out_W, i % out_W]
-                    max_idx = np.unravel_index(np.argmax(col), col.shape)
-                    dcols[n, c, i] = dout_reshaped[n, c, i]
-                    dcols[n, c, i][max_idx] = dout_reshaped[n, c, i]
+                for i in range(out_H):
+                    for j in range(out_W):
+                        # Get the pooling window
+                        window = cols_reshaped[n, c, i, j]  # shape = (pool_h, pool_w)
+                        # Find the position of the max in the window
+                        max_idx = np.unravel_index(np.argmax(window), window.shape)
+                        # Add the gradient to the corresponding input position
+                        h_start = i * stride
+                        w_start = j * stride
+                        dx[n, c, h_start + max_idx[0], w_start + max_idx[1]] += dout[n, c, i, j]
 
-        # Convert the columns back to the image shape.
-        dx = column_to_image(dcols, x.shape, self.pool_size, self.stride,
-                             self.padding)
+        # Remove padding if necessary
+        if padding > 0:
+            dx = dx[:, :, padding:-padding, padding:-padding]
 
         return dx
+

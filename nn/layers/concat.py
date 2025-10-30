@@ -4,13 +4,13 @@ from .base_layers import Layer
 
 class Concat(Layer):
     """The Concat Layer, which performs concatenations."""
-    def __init__(self, axis: int) -> None:
+    def __init__(self, axis: int, name: str = "Concat") -> None:
         """Initialise the Concat Layer.
 
         Args:
             axis (int):  The axis along which to concatenate the inputs.
         """
-        super().__init__()
+        super().__init__(name)
         self.axis = axis
         self.input_shapes = None
 
