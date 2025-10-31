@@ -10,15 +10,15 @@ from .maxpool2d import MaxPool2D
 from .sequential import Sequential
 
 __all__ = [
-    'Layer',
-    'Layer2D',
-    'BatchNorm2D',
-    'Concat',
-    'Conv2D',
-    'Dropout',
-    'Flatten',
-    'GlobalAvgPool2D',
-    'Linear',
-    'MaxPool2D',
-    'Sequential'
+    "Layer",
+    "Layer2D",
+    "BatchNorm2D",
+    "Concat",
+    "Conv2D",
+    "Dropout",
+    "Flatten",
+    "GlobalAvgPool2D",
+    "Linear",
+    "MaxPool2D",
+    "Sequential",
 ]

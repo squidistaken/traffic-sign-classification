@@ -4,16 +4,17 @@ from logger import Logger
 from typing import Tuple, List, Any
 
 
-def train(model: Any,
-          train_loader: Any,
-          val_loader: Any = None,
-          loss_fn: Any = None,
-          optimiser: Any = None,
-          num_epochs: int = 10,
-          batch_size: int = 32,
-          checkpoint_dir: str = "checkpoints",
-          log_dir: str = "logs"
-          ) -> Tuple[List[float], List[float], List[float], List[float]]:
+def train(
+    model: Any,
+    train_loader: Any,
+    val_loader: Any = None,
+    loss_fn: Any = None,
+    optimiser: Any = None,
+    num_epochs: int = 10,
+    batch_size: int = 32,
+    checkpoint_dir: str = "checkpoints",
+    log_dir: str = "logs",
+) -> Tuple[List[float], List[float], List[float], List[float]]:
     """
     Train the model and log metrics.
     Returns:
@@ -58,8 +59,9 @@ def train(model: Any,
         train_losses.append(epoch_train_loss)
         train_accs.append(epoch_train_acc)
 
-        logger.log_training_metrics(epoch, num_epochs,
-                                    epoch_train_loss, epoch_train_acc)
+        logger.log_training_metrics(
+            epoch, num_epochs, epoch_train_loss, epoch_train_acc
+        )
 
         # Validation loop
         if val_loader:
@@ -82,10 +84,12 @@ def train(model: Any,
             val_losses.append(epoch_val_loss)
             val_accs.append(epoch_val_acc)
 
-            logger.log_validation_metrics(epoch, num_epochs, epoch_val_loss, epoch_val_acc)
+            logger.log_validation_metrics(
+                epoch, num_epochs, epoch_val_loss, epoch_val_acc
+            )
 
         # Save checkpoint
-        checkpoint_path = os.path.join(checkpoint_dir, f'model_epoch_{epoch + 1}.npz')
+        checkpoint_path = os.path.join(checkpoint_dir, f"model_epoch_{epoch + 1}.npz")
         np.savez(checkpoint_path, model_params=model.params())
 
     return train_losses, val_losses, train_accs, val_accs

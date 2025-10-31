@@ -6,10 +6,16 @@ import csv
 
 class GTSRBDataset:
     """German Traffic Sign Recognition Benchmark Dataset Class."""
-    def __init__(self, root: str = "data/gtsrb/", x_dir: str = "images/",
-                 labels: str = "labels.csv", indices: List[int] = [],
-                 split: Literal["train", "val", "test"] = "train",
-                 transforms: Optional[Callable] = None) -> None:
+
+    def __init__(
+        self,
+        root: str = "data/gtsrb/",
+        x_dir: str = "images/",
+        labels: str = "labels.csv",
+        indices: List[int] = [],
+        split: Literal["train", "val", "test"] = "train",
+        transforms: Optional[Callable] = None,
+    ) -> None:
         """Initialise the GTSRB dataset.
 
         Args:
@@ -44,7 +50,7 @@ class GTSRBDataset:
                                    label.
         """
         with open(os.path.join(self.root, self.labels), "r") as f:
-            reader = csv.reader(f, delimiter=';')
+            reader = csv.reader(f, delimiter=";")
             next(reader)  # Skip header
             return [(row[0], int(row[7])) for row in reader]
 
@@ -111,9 +117,7 @@ class GTSRBDataset:
 
         actual_index = self.indices[index]
         filename, label = self.labels_data[actual_index]
-        image = self.load_ppm_image(
-            os.path.join(self.root, self.x_dir, filename)
-        )
+        image = self.load_ppm_image(os.path.join(self.root, self.x_dir, filename))
 
         if self.transforms:
             image = self.transforms(image)

@@ -2,8 +2,9 @@ import numpy as np
 from typing import Tuple
 
 
-def image_to_column(x: np.ndarray, kernel_size: int, stride: int,
-                    padding: int = 0) -> np.ndarray:
+def image_to_column(
+    x: np.ndarray, kernel_size: int, stride: int, padding: int = 0
+) -> np.ndarray:
     """Convert image to columns for efficient convolution.
 
     Args:
@@ -24,8 +25,9 @@ def image_to_column(x: np.ndarray, kernel_size: int, stride: int,
 
     # Pad the input, if necessary.
     if padding > 0:
-        x_padded = np.pad(x, ((0, 0), (0, 0), (padding, padding),
-                              (padding, padding)), mode='constant')
+        x_padded = np.pad(
+            x, ((0, 0), (0, 0), (padding, padding), (padding, padding)), mode="constant"
+        )
     else:
         x_padded = x
 
@@ -52,9 +54,13 @@ def image_to_column(x: np.ndarray, kernel_size: int, stride: int,
     return cols
 
 
-def column_to_image(dx_cols: np.ndarray, x_shape: Tuple[int, int, int, int],
-                    kernel_size: int, stride: int, padding: int = 0
-                    ) -> np.ndarray:
+def column_to_image(
+    dx_cols: np.ndarray,
+    x_shape: Tuple[int, int, int, int],
+    kernel_size: int,
+    stride: int,
+    padding: int = 0,
+) -> np.ndarray:
     """
     Convert columns to image after convolution.
 
@@ -94,8 +100,9 @@ def column_to_image(dx_cols: np.ndarray, x_shape: Tuple[int, int, int, int],
 
                 # Extract the current patch and reshape it
                 patch = dx_cols[:, n * out_H * out_W + i * out_W + j]
-                dx[n, :, h_start:h_end, w_start:w_end] += (
-                    patch.reshape(C, kernel_size, kernel_size))
+                dx[n, :, h_start:h_end, w_start:w_end] += patch.reshape(
+                    C, kernel_size, kernel_size
+                )
 
     # Remove the padding, if necessary.
     if padding > 0:

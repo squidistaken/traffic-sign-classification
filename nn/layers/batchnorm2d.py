@@ -5,8 +5,14 @@ import numpy as np
 
 class BatchNorm2D(Layer2D):
     """The BatchNorm2D Layer, which performs 2D batch normalization."""
-    def __init__(self, num_channels: int, momentum: float = 0.9,
-                 epsilon: float = 1e-5, name: str = "BatchNorm2D") -> None:
+
+    def __init__(
+        self,
+        num_channels: int,
+        momentum: float = 0.9,
+        epsilon: float = 1e-5,
+        name: str = "BatchNorm2D",
+    ) -> None:
         """Initialize the BatchNorm2D layer.
 
         Args:
@@ -56,24 +62,26 @@ class BatchNorm2D(Layer2D):
             var = np.var(x, axis=(0, 2, 3))
 
             # Update the running mean and variance.
-            self.running_mean = (self.momentum * self.running_mean +
-                                 (1 - self.momentum) * mean)
-            self.running_var = (self.momentum * self.running_var +
-                                (1 - self.momentum) * var)
+            self.running_mean = (
+                self.momentum * self.running_mean + (1 - self.momentum) * mean
+            )
+            self.running_var = (
+                self.momentum * self.running_var + (1 - self.momentum) * var
+            )
         else:
             mean = self.running_mean
             var = self.running_var
 
         # Normalize the input.
-        x_norm = ((x - mean.reshape(1, C, 1, 1)) /
-                  np.sqrt(var.reshape(1, C, 1, 1) + self.epsilon))
+        x_norm = (x - mean.reshape(1, C, 1, 1)) / np.sqrt(
+            var.reshape(1, C, 1, 1) + self.epsilon
+        )
 
         # Scale and shift the normalized input.
-        out = (self.gamma.reshape(1, C, 1, 1) * x_norm +
-               self.beta.reshape(1, C, 1, 1))
+        out = self.gamma.reshape(1, C, 1, 1) * x_norm + self.beta.reshape(1, C, 1, 1)
 
         # Cache variables for backward pass.
-        self.cache = {'x': x, 'x_norm': x_norm, 'mean': mean, 'var': var}
+        self.cache = {"x": x, "x_norm": x_norm, "mean": mean, "var": var}
 
         return out
 
@@ -85,25 +93,31 @@ class BatchNorm2D(Layer2D):
         Returns:
             np.ndarray: The downstream gradient.
         """
-        x = self.cache['x']
-        x_norm = self.cache['x_norm']
-        mean = self.cache['mean']
-        var = self.cache['var']
+        x = self.cache["x"]
+        x_norm = self.cache["x_norm"]
+        mean = self.cache["mean"]
+        var = self.cache["var"]
         N, C, _, _ = x.shape
         # Compute gradients.
         self.grad_gamma = np.sum(dout * x_norm, axis=(0, 2, 3))
         self.grad_beta = np.sum(dout, axis=(0, 2, 3))
         dx_norm = dout * self.gamma.reshape(1, C, 1, 1)
-        dvar = np.sum(dx_norm * (x - mean.reshape(1, C, 1, 1)) *
-                      -0.5 * (var.reshape(1, C, 1, 1) + self.epsilon) ** -1.5,
-                      axis=(0, 2, 3))
-        dmean = (np.sum(dx_norm * -1 /
-                        np.sqrt(var.reshape(1, C, 1, 1) + self.epsilon),
-                        axis=(0, 2, 3)) + dvar * -2 * np.mean(
-                            x - mean.reshape(1, C, 1, 1), axis=(0, 2, 3)))
-        dx = (dx_norm / np.sqrt(var.reshape(1, C, 1, 1) + self.epsilon) +
-              dvar.reshape(1, C, 1, 1) * 2 * (x - mean.reshape(1, C, 1, 1)) / N
-              + dmean.reshape(1, C, 1, 1) / N)
+        dvar = np.sum(
+            dx_norm
+            * (x - mean.reshape(1, C, 1, 1))
+            * -0.5
+            * (var.reshape(1, C, 1, 1) + self.epsilon) ** -1.5,
+            axis=(0, 2, 3),
+        )
+        dmean = np.sum(
+            dx_norm * -1 / np.sqrt(var.reshape(1, C, 1, 1) + self.epsilon),
+            axis=(0, 2, 3),
+        ) + dvar * -2 * np.mean(x - mean.reshape(1, C, 1, 1), axis=(0, 2, 3))
+        dx = (
+            dx_norm / np.sqrt(var.reshape(1, C, 1, 1) + self.epsilon)
+            + dvar.reshape(1, C, 1, 1) * 2 * (x - mean.reshape(1, C, 1, 1)) / N
+            + dmean.reshape(1, C, 1, 1) / N
+        )
         return dx
 
     def params(self) -> list[np.ndarray]:
@@ -124,8 +138,9 @@ class BatchNorm2D(Layer2D):
         """
         return [("gamma", self.grad_gamma), ("beta", self.grad_beta)]
 
-    def output_shape(self, input_shape: tuple[int, int, int, int]
-                     ) -> tuple[int, int, int, int]:
+    def output_shape(
+        self, input_shape: tuple[int, int, int, int]
+    ) -> tuple[int, int, int, int]:
         """Compute the output shape given the input shape.
 
         Args:

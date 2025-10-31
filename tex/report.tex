@@ -19,6 +19,7 @@
 
 % Bibliography
 \usepackage[numbers]{natbib}
+\bibliographystyle{apalike}
 
 % Formatting
 \usepackage{setspace}
@@ -29,7 +30,7 @@
 % Title info
 \title{Semester Project Report \\ \large Neural Networks (AI)}
 \author{
-  Team Members: Alice Example, Bob Example, Carol Example \\
+  Team Members: David van Wuijkhuijse (s5592968), Marcus Harald Olof Persson (s5343798), Richard Frank Harnisch (s5238366) \\
   University of Groningen
 }
 \date{\today}
@@ -39,19 +40,76 @@
 \maketitle
 
 \begin{abstract}
-\noindent
-A concise ($\approx$10 lines) summary of the task, dataset, methods, and main results.
+  \noindent
+  We implemented a feed-forward convolutional neural network from the group up including loss, activations, optimizer, and LR scheduler. We trained and evaluated the model on the German Traffic Sign Recognition Benchmark (GTSRB) dataset with 38 classes. Our model achieved a test accuracy of xx\%.
 \end{abstract}
 
 \tableofcontents
 \newpage
 
 \section{Introduction}
-State your project task (given or self-chosen).  
-Briefly describe dataset(s) and objectives.  
+State your project task (given or self-chosen).
+Briefly describe dataset(s) and objectives.
 Keep it short, direct, and specific to your project.
 
 \section{Data}
+The German Traffic Sign Recognition Benchmark (GTSRB) dataset consists of 51,839 images of traffic signs on german roads, categorized into 43 different classes. The images are taken from dashcam footage of cars driving on the road and thus past the signs. This means that each sign is captured multiple times as the car passes the sign. This lessens the need for data augmentation as each sign is already represented multiple times. Signs are captured in a range of different lighting and weather conditions, as well as from different angles and distances.
+\begin{figure}
+  \centering
+  \includegraphics[width=0.3\textwidth]{images/00000_00000_00000.png}
+  \includegraphics[width=0.3\textwidth]{images/00000_00000_00015.png}
+  \includegraphics[width=0.3\textwidth]{images/00000_00000_00029.png}
+  \caption{The same sign from different distances (and thus sizes) and slightly different angles.}
+  \label{fig:augmentation}
+\end{figure}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.3\textwidth]{images/00001_00001_00005.png}
+  \includegraphics[width=0.3\textwidth]{images/00001_00006_00014.png}
+  \includegraphics[width=0.3\textwidth]{images/00001_00012_00014.png}
+  \caption{Three different signs of the same type exhibiting variation in lighting conditions and angles.}
+  \label{fig:variation}
+\end{figure}
+
+The dataset is provided by Stallkamp et al. (2012) \cite{Stallkamp-IJCNN-2011} \cite{Stallkamp2012} from the Institute for Neuroinformatics at the University of Bochum in Germany. By default, the dataset is split into a training set and a testing set. This was originally for a competition at the International Joint Conference on Neural Networks in 2011. Considering we are (considerably) past the deadline for submission, we have chosen to merge the training and testing sets at download time and then create our own split. This allows us to modify the split ratio as we like.
+
+The images themselves are presented as PPM files with varying resolution and aspect ratio depending on the distance and angle of the sign to the camera. The aspect ratio is mostly close to 1:1. For more detailed analysis of the images sizes see Table \ref{tab:image-stats} and Figure \ref{fig:image-dimensions}. There are three color channels (RGB) and the pixel values are in the range of 0-255. See Figure \ref{color-histogram} for the distribution of pixel values. The labels for the images are provided in one master file \texttt{labels.csv} for the entire dataset. Each line contains the filename, class ID, and bounding box coordinates for the sign in the image.
+
+\begin{table}
+  \centering
+  \begin{tabular}{lrrr}
+    Statistic                & Width (px) & Height (px) & Aspect Ratio (W/H) \\
+    \hline
+    Mean                     & 50.76      & 50.34       & 1.0056             \\
+    Std                      & 24.50      & 23.26       & 0.0734             \\
+    Min                      & 25         & 25          & 0.3681             \\
+    25th Percentile          & 34         & 35          & 0.9706             \\
+    50th Percentile (Median) & 43         & 43          & 1.0000             \\
+    75th Percentile          & 58         & 58          & 1.0385             \\
+    Max                      & 266        & 232         & 1.4375             \\
+    \hline
+  \end{tabular}
+  \caption{Descriptive statistics of image dimensions and aspect ratios in the GTSRB dataset.}
+  \label{tab:image-stats}
+\end{table}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.45\textwidth]{images/histogram_dimensions.png}
+  \includegraphics[width=0.45\textwidth]{images/histogram_ratio.png}
+  \caption{Distribution of image dimensions and aspect ratios in the GTSRB dataset. Most images are around 30-70 pixels in both dimensions, with a long tail towards larger sizes.}
+  \label{fig:image-dimensions}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/histogram_color.png}
+  \caption{Histogram of pixel values across all images and color channels in the GTSRB dataset. The graph is cut off at frequency=50, but the frequency of flat white is very high due to the reflective nature of signs as well as the common use of the color white, causing (parts of) signs to max out the camera's sensor.}
+  \label{color-histogram}
+\end{figure}
+
+We load the data as a numpy array of shape (H, W, C) for each image, where H is height, W is width, and C is the color channel (so three). The labels are loaded as integers corresponding to the class IDs. Before feeding the images to the model, we normalize the pixel values to the range [0, 1] by dividing by 255.
+
 \begin{itemize}
   \item Source of dataset
   \item Size and type (tabular, images, time series…)
@@ -61,15 +119,15 @@ Keep it short, direct, and specific to your project.
 
 \section{Methods and Experiments}
 \subsection{Pipeline Overview}
-Diagram or list of your full pipeline: preprocessing, model, optimization.  
+Diagram or list of your full pipeline: preprocessing, model, optimization.
 
 \subsection{Model Description}
-- Architecture (MLP, CNN, etc.), with math or pseudocode if needed.  
-- Loss function, optimizer, regularization.  
+- Architecture (MLP, CNN, etc.), with math or pseudocode if needed.
+- Loss function, optimizer, regularization.
 
 \subsection{Training Procedure}
-- Cross-validation setup, train/test split.  
-- Hyperparameters and how you chose them.  
+- Cross-validation setup, train/test split.
+- Hyperparameters and how you chose them.
 
 \section{Results}
 \begin{itemize}
@@ -88,8 +146,6 @@ Diagram or list of your full pipeline: preprocessing, model, optimization.
 \section{Conclusion}
 Wrap up: summarize objectives, approach, key findings, and lessons learned.
 
-\section*{References}
-\bibliographystyle{plainnat}
 \bibliography{references}
 
 \appendix

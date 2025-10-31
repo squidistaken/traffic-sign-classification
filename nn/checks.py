@@ -42,8 +42,9 @@ def check_model_performance(accuracy: float, threshold: float) -> bool:
     return accuracy >= threshold
 
 
-def check_model_convergence(loss_values: list[float], patience: int = 5,
-                            tol: float = 1e-4) -> bool:
+def check_model_convergence(
+    loss_values: list[float], patience: int = 5, tol: float = 1e-4
+) -> bool:
     """Check if the model has converged based on the loss values.
 
     Args:

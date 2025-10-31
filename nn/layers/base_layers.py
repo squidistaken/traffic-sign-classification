@@ -8,6 +8,7 @@ class Layer(ABC):
     """
     Abstract Base Class for Layers. NP arrays are expected in NCHW format.
     """
+
     def __init__(self, name: str = "Layer") -> None:
         """
         Initialize layer parameters and gradients.
@@ -77,6 +78,8 @@ class Layer(ABC):
             tuple: The shape of the output.
         """
         pass
+
+
 # endregion
 
 
@@ -85,7 +88,10 @@ class Layer2D(Layer):
     """
     Abstract Base Class for 2D Layers. NP arrays are expected in NCHW format.
     """
-    def __init__(self, stride: int = 1, padding: int = 0, name: str = "Layer2D") -> None:
+
+    def __init__(
+        self, stride: int = 1, padding: int = 0, name: str = "Layer2D"
+    ) -> None:
         """
         Initialize the 2D layer.
 
@@ -125,8 +131,9 @@ class Layer2D(Layer):
         """
         pass
 
-    def output_shape(self, input_shape: Tuple[int, int, int, int]
-                     ) -> Tuple[int, int, int, int]:
+    def output_shape(
+        self, input_shape: Tuple[int, int, int, int]
+    ) -> Tuple[int, int, int, int]:
         """
         Compute the output shape given the input shape.
 
@@ -173,9 +180,15 @@ class Layer2D(Layer):
         if self.padding > 0:
             return np.pad(
                 x,
-                ((0, 0), (0, 0), (self.padding, self.padding),
-                 (self.padding, self.padding)), mode='constant',
-                constant_values=0)
+                (
+                    (0, 0),
+                    (0, 0),
+                    (self.padding, self.padding),
+                    (self.padding, self.padding),
+                ),
+                mode="constant",
+                constant_values=0,
+            )
         else:
             return x
 
@@ -190,8 +203,9 @@ class Layer2D(Layer):
             np.ndarray: The unpadded input array.
         """
         if self.padding > 0:
-            return x[:, :, self.padding:-self.padding,
-                     self.padding:-self.padding]
+            return x[:, :, self.padding : -self.padding, self.padding : -self.padding]
         else:
             return x
+
+
 # endregion

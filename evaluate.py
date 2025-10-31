@@ -3,9 +3,14 @@ from typing import Tuple, Any
 from nn.model import Model
 
 
-def evaluate(model: Model, test_data: np.ndarray, test_labels: np.ndarray,
-             loss_fn: Any, batch_size: int = 32, verbose: bool = True
-             ) -> Tuple[float, float]:
+def evaluate(
+    model: Model,
+    test_data: np.ndarray,
+    test_labels: np.ndarray,
+    loss_fn: Any,
+    batch_size: int = 32,
+    verbose: bool = True,
+) -> Tuple[float, float]:
     """
     Evaluate the model on a test dataset.
 
@@ -29,8 +34,8 @@ def evaluate(model: Model, test_data: np.ndarray, test_labels: np.ndarray,
 
     # Iterate over the test dataset in batches.
     for i in range(0, len(test_data), batch_size):
-        batch_data = test_data[i:i + batch_size]
-        batch_labels = test_labels[i:i + batch_size]
+        batch_data = test_data[i : i + batch_size]
+        batch_labels = test_labels[i : i + batch_size]
 
         # Forward pass.
         output = model.forward(batch_data)
@@ -51,10 +56,15 @@ def evaluate(model: Model, test_data: np.ndarray, test_labels: np.ndarray,
     return test_loss, test_acc
 
 
-def evaluate_corruption(model: Model, test_data: np.ndarray,
-                        test_labels: np.ndarray, corruption_fn: Any,
-                        loss_fn: Any, batch_size: int = 32,
-                        verbose: bool = True) -> Tuple[float, float]:
+def evaluate_corruption(
+    model: Model,
+    test_data: np.ndarray,
+    test_labels: np.ndarray,
+    corruption_fn: Any,
+    loss_fn: Any,
+    batch_size: int = 32,
+    verbose: bool = True,
+) -> Tuple[float, float]:
     """
     Evaluate the model on a corrupted test dataset.
 
@@ -82,8 +92,8 @@ def evaluate_corruption(model: Model, test_data: np.ndarray,
 
     # Iterate over the corrupted test dataset in batches.
     for i in range(0, len(corrupted_test_data), batch_size):
-        batch_data = corrupted_test_data[i:i + batch_size]
-        batch_labels = test_labels[i:i + batch_size]
+        batch_data = corrupted_test_data[i : i + batch_size]
+        batch_labels = test_labels[i : i + batch_size]
 
         # Forward pass.
         output = model.forward(batch_data)
@@ -99,7 +109,9 @@ def evaluate_corruption(model: Model, test_data: np.ndarray,
     corrupted_test_acc /= len(corrupted_test_data)
 
     if verbose:
-        print(f"Corrupted Test Loss: {corrupted_test_loss:.4f},"
-              f"Corrupted Test Accuracy: {corrupted_test_acc:.4f}")
+        print(
+            f"Corrupted Test Loss: {corrupted_test_loss:.4f},"
+            f"Corrupted Test Accuracy: {corrupted_test_acc:.4f}"
+        )
 
     return corrupted_test_loss, corrupted_test_acc

@@ -5,10 +5,16 @@ from .gtsrb_dataset import GTSRBDataset
 
 class DataLoader:
     """DataLoader for GTSRB dataset."""
+
     def __init__(
-        self, dataset: 'GTSRBDataset', batch_size: int = 128,
-        shuffle: bool = True, drop_last: bool = False, seed: int = 32,
-        collate_fn: Optional[Callable] = None, prefetch_batches: int = 0
+        self,
+        dataset: "GTSRBDataset",
+        batch_size: int = 128,
+        shuffle: bool = True,
+        drop_last: bool = False,
+        seed: int = 32,
+        collate_fn: Optional[Callable] = None,
+        prefetch_batches: int = 0,
     ) -> None:
         """Initialize the DataLoader.
 
@@ -45,8 +51,9 @@ class DataLoader:
         self.collate_fn = collate_fn
         self.prefetch_batches = prefetch_batches
 
-    def default_collate(self, batch: List[Tuple[np.ndarray, int]]
-                        ) -> tuple[np.ndarray, np.ndarray]:
+    def default_collate(
+        self, batch: List[Tuple[np.ndarray, int]]
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Defautly collate a batch of samples into a batch.
 
         Args:

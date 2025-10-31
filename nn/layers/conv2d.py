@@ -6,9 +6,16 @@ from ..utils import image_to_column, column_to_image
 
 class Conv2D(Layer2D):
     """The Conv2D Layer, which performs a 2D convolution operation."""
-    def __init__(self, in_channels: int, out_channels: int,
-                 kernel_size: int, stride: int = 1,
-                 padding: int = 0, name: str = "Conv2D") -> None:
+
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        kernel_size: int,
+        stride: int = 1,
+        padding: int = 0,
+        name: str = "Conv2D",
+    ) -> None:
         """Initialize Conv2D layer.
 
         Args:
@@ -26,8 +33,9 @@ class Conv2D(Layer2D):
         self.kernel_size = kernel_size
 
         # Initialize the weights and biases.
-        self.weights = np.random.randn(out_channels, in_channels, kernel_size,
-                                       kernel_size) * 0.01
+        self.weights = (
+            np.random.randn(out_channels, in_channels, kernel_size, kernel_size) * 0.01
+        )
         self.biases = np.zeros(out_channels)
 
         # Gradients
@@ -69,7 +77,7 @@ class Conv2D(Layer2D):
         out = out.reshape(F, N, out_H, out_W).transpose(1, 0, 2, 3)
 
         # Cache the input and columns for backward pass.
-        self.cache = {'x': x, 'cols': cols}
+        self.cache = {"x": x, "cols": cols}
 
         return out
 
@@ -83,8 +91,8 @@ class Conv2D(Layer2D):
         Returns:
             np.ndarray: The downstream gradient.
         """
-        x = self.cache['x']
-        cols = self.cache['cols']
+        x = self.cache["x"]
+        cols = self.cache["cols"]
         N, C, H, W = x.shape
         F, _, HH, WW = self.weights.shape
         _, _, out_H, out_W = dout.shape
@@ -133,9 +141,7 @@ class Conv2D(Layer2D):
             tuple: The shape of the output.
         """
         batch_size, channels, height, width = input_shape
-        out_height = (
-            1 + (height + 2 * self.padding - self.kernel_size) // self.stride)
-        out_width = (
-            1 + (width + 2 * self.padding - self.kernel_size) // self.stride)
+        out_height = 1 + (height + 2 * self.padding - self.kernel_size) // self.stride
+        out_width = 1 + (width + 2 * self.padding - self.kernel_size) // self.stride
 
         return (batch_size, self.out_channels, out_height, out_width)

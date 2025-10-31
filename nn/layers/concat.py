@@ -4,6 +4,7 @@ from .base_layers import Layer
 
 class Concat(Layer):
     """The Concat Layer, which performs concatenations."""
+
     def __init__(self, axis: int, name: str = "Concat") -> None:
         """Initialise the Concat Layer.
 
@@ -14,8 +15,7 @@ class Concat(Layer):
         self.axis = axis
         self.input_shapes = None
 
-    def forward(self, x: list[np.ndarray],
-                training: bool = True) -> np.ndarray:
+    def forward(self, x: list[np.ndarray], training: bool = True) -> np.ndarray:
         """
         Perform the forward pass of the layer.
 

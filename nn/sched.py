@@ -5,6 +5,7 @@ from typing import Callable, Union, List
 
 class LRScheduler(ABC):
     """Abstract Base Class for Learning Rate Schedulers"""
+
     @abstractmethod
     def get_lr(self, curr_epoch: int) -> float:
         """
@@ -38,8 +39,8 @@ class LRScheduler(ABC):
 # region Step LR Scheduler
 class StepLRScheduler(LRScheduler):
     """The Step Learning Rate Scheduler class."""
-    def __init__(self, base_lr: float, step_size: int, gamma: float = 0.1
-                 ) -> None:
+
+    def __init__(self, base_lr: float, step_size: int, gamma: float = 0.1) -> None:
         """
         Initialise the step learning rate scheduler class.
 
@@ -65,9 +66,11 @@ class StepLRScheduler(LRScheduler):
         """
         # For every decay step, multiply base lr by gamma
         amount_of_steps = curr_epoch // self.step_size
-        lr = self.base_lr * (self.gamma ** amount_of_steps)
+        lr = self.base_lr * (self.gamma**amount_of_steps)
 
         return lr
+
+
 # endregion
 
 
@@ -77,8 +80,8 @@ class CosineLRScheduler(LRScheduler):
     The Cosine Learning Rate/Annealer class, which slowly reduces the learning
     rate using cosine curves.
     """
-    def __init__(self, base_lr: float, lowest_lr: float, total_epochs: int
-                 ) -> None:
+
+    def __init__(self, base_lr: float, lowest_lr: float, total_epochs: int) -> None:
         """
         Initialise the cosine annealer class.
 
@@ -100,20 +103,23 @@ class CosineLRScheduler(LRScheduler):
         Returns:
             float: The learning rate.
         """
-        lr = (
-            self.lowest_lr + 0.5 * (self.base_lr - self.lowest_lr) *
-            (1 + np.cos(np.pi * curr_epoch / self.total_epochs))
+        lr = self.lowest_lr + 0.5 * (self.base_lr - self.lowest_lr) * (
+            1 + np.cos(np.pi * curr_epoch / self.total_epochs)
         )
 
         return lr
+
+
 # endregion
 
 
 # region Warmup LR Scheduler
 class WarmupLRScheduler(LRScheduler):
     """The Warmup Learning Rate Scheduler class."""
-    def __init__(self, base_lr: float, warmup_epochs: int,
-                 post_sched: Callable | None = None) -> None:
+
+    def __init__(
+        self, base_lr: float, warmup_epochs: int, post_sched: Callable | None = None
+    ) -> None:
         """Initialise the warmup learning rate scheduler class.
 
         Args:
@@ -146,4 +152,6 @@ class WarmupLRScheduler(LRScheduler):
                 lr = self.base_lr
 
         return lr
+
+
 # endregion

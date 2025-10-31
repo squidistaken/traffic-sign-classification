@@ -4,7 +4,8 @@ import os
 
 class Logger:
     """Logger class."""
-    def __init__(self, log_dir: str = 'logs', log_file: str = 'training.log'):
+
+    def __init__(self, log_dir: str = "logs", log_file: str = "training.log"):
         """
         Initialise the logger.
 
@@ -24,8 +25,9 @@ class Logger:
         log_path = os.path.join(self.log_dir, self.log_file)
         logging.basicConfig(filename=log_path, level=logging.INFO)
 
-    def log_training_metrics(self, epoch: int, num_epochs: int,
-                             train_loss: float, train_acc: float) -> None:
+    def log_training_metrics(
+        self, epoch: int, num_epochs: int, train_loss: float, train_acc: float
+    ) -> None:
         """
         Log the training metrics.
 
@@ -40,8 +42,9 @@ class Logger:
             f"Train Accuracy: {train_acc:.4f}"
         )
 
-    def log_validation_metrics(self, epoch: int, num_epochs: int,
-                               val_loss: float, val_acc: float) -> None:
+    def log_validation_metrics(
+        self, epoch: int, num_epochs: int, val_loss: float, val_acc: float
+    ) -> None:
         """
         Log the validation metrics.
 
