@@ -34,6 +34,9 @@ def train(model: Any,
         for b_data, b_labels in train_loader:
             n_train_samples += b_data.shape[0]
 
+            # Reset optimiser gradients
+            optimiser.zero_grad()
+
             # Forward pass
             output = model.forward(b_data, training=True)
 
