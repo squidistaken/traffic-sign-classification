@@ -2,11 +2,10 @@ from typing import Optional, Callable, Literal, Tuple, List
 import numpy as np
 import os
 import csv
-
+from concurrent.futures import ThreadPoolExecutor
 
 class GTSRBDataset:
     """German Traffic Sign Recognition Benchmark Dataset Class."""
-
     def __init__(
         self,
         root: str = "data/gtsrb/",
@@ -15,9 +14,10 @@ class GTSRBDataset:
         indices: List[int] = [],
         split: Literal["train", "val", "test"] = "train",
         transforms: Optional[Callable] = None,
+        cache: bool = False,  # Enable caching
+        num_workers: int = 4,  # Number of workers for parallel loading
     ) -> None:
         """Initialise the GTSRB dataset.
-
         Args:
             root (str, optional): The root directory of the dataset.
                                   Defaults to "data/gtsrb/".
@@ -33,6 +33,10 @@ class GTSRBDataset:
             transforms (Optional[Callable], optional): The transformations to
                                                        apply to the images.
                                                        Defaults to None.
+            cache (bool, optional): Whether to cache loaded images. Defaults to
+                                    False.
+            num_workers (int, optional): Number of workers for parallel loading.
+                                         Defaults to 4.
         """
         self.root = root
         self.x_dir = x_dir
@@ -40,11 +44,14 @@ class GTSRBDataset:
         self.indices = indices
         self.split = split
         self.transforms = transforms
+        self.cache = cache
+        self.num_workers = num_workers
         self.labels_data = self._load_labels()
+        self.executor = ThreadPoolExecutor(max_workers=num_workers)
+        self.image_cache = {} if cache else None
 
     def _load_labels(self) -> List[Tuple[str, int]]:
         """Load the labels from the labels file.
-
         Returns:
             List[Tuple[str, int]]: A list of tuples containing filename and
                                    label.
@@ -56,7 +63,6 @@ class GTSRBDataset:
 
     def __len__(self) -> int:
         """Set the length of the dataset.
-
         Returns:
             int: The length of the dataset.
         """
@@ -64,15 +70,12 @@ class GTSRBDataset:
 
     def load_ppm_image(self, filepath: str) -> np.ndarray:
         """Load a PPM P6 image from the given filepath.
-
         Args:
             filepath (str): The path to the PPM image file. It is expected to
                             be in PPM P6 format and 8-bit per channel.
-
         Raises:
             ValueError: If the file is not a valid PPM P6 file.
             ValueError: If the PPM file is not 8-bit.
-
         Returns:
             np.ndarray: The loaded image as a NumPy array.
         """
@@ -99,13 +102,10 @@ class GTSRBDataset:
 
     def __getitem__(self, index: int) -> Tuple[np.ndarray, int]:
         """Get an item from the dataset.
-
         Args:
             index (int): The index of the item to retrieve.
-
         Raises:
             IndexError: If the index is out of range.
-
         Returns:
             Tuple[np.ndarray, int]: The image and its corresponding label, as a
                                     tuple.
@@ -114,16 +114,25 @@ class GTSRBDataset:
             raise IndexError(
                 f"Index {index} out of range for dataset of size {len(self)}"
             )
-
         actual_index = self.indices[index]
         filename, label = self.labels_data[actual_index]
-        image = self.load_ppm_image(os.path.join(self.root, self.x_dir, filename))
+        filepath = os.path.join(self.root, self.x_dir, filename)
+
+        # Check cache first
+        if self.cache and filepath in self.image_cache:
+            image = self.image_cache[filepath]
+        else:
+            image = self.load_ppm_image(filepath)
+            if self.cache:
+                self.image_cache[filepath] = image
 
         if self.transforms:
             image = self.transforms(image)
-
         return image, label
 
+    def __del__(self):
+        """Clean up the executor when the dataset is deleted."""
+        self.executor.shutdown(wait=False)
 
 def tests() -> None:
     """Run tests for GTSRBDataset class."""
@@ -132,39 +141,27 @@ def tests() -> None:
         indices=list(range(10)),
         transforms=lambda x: x / 255.0,
     )
-
     print(f"Dataset length: {len(dataset)}")
-
     for i in range(len(dataset)):
         img, label = dataset[i]
-
         print(f"Image shape: {img.shape}, Label: {label}")
-
     # Test with a single index
     dataset_single = GTSRBDataset(
         indices=[0],
         transforms=lambda x: x / 255.0,
     )
-
     print(f"Single index dataset length: {len(dataset_single)}")
-
     img, label = dataset_single[0]
-
     print(f"Single image shape: {img.shape}, Label: {label}")
-
     # Test without transforms
     dataset_no_transform = GTSRBDataset(
         indices=list(range(5)),
         transforms=None,
     )
-
     print(f"Dataset without transforms length: {len(dataset_no_transform)}")
-
     for i in range(len(dataset_no_transform)):
         img, label = dataset_no_transform[i]
-
         print(f"Image shape (no transform): {img.shape}, Label: {label}")
-
 
 if __name__ == "__main__":
     tests()
