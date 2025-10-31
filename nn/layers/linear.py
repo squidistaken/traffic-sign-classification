@@ -15,7 +15,7 @@ class Linear(Layer):
         out_features: int,
         W: Optional[np.ndarray] = None,
         b: Optional[np.ndarray] = None,
-        name: str = "Linear"
+        name: str = "Linear",
     ) -> None:
         """
         Initialize the Linear layer. If the weight matrix W or bias b

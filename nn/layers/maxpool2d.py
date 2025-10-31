@@ -6,8 +6,10 @@ from ..utils import image_to_column, column_to_image
 
 class MaxPool2D(Layer2D):
     """The MaxPool2D Layer, which performs 2D max pooling."""
-    def __init__(self, pool_size: int, stride: int = 1,
-                 padding: int = 0, name: str = "MaxPool2D") -> None:
+
+    def __init__(
+        self, pool_size: int, stride: int = 1, padding: int = 0, name: str = "MaxPool2D"
+    ) -> None:
         """Initialize the MaxPool2D layer.
 
         Args:
@@ -49,8 +51,7 @@ class MaxPool2D(Layer2D):
         cols = image_to_column(x, pool_H, self.stride, self.padding)
 
         # Reshape for the columns for the pooling operation.
-        cols_reshaped = cols.reshape(N, C, out_H, out_W, self.pool_size,
-                                     self.pool_size)
+        cols_reshaped = cols.reshape(N, C, out_H, out_W, self.pool_size, self.pool_size)
 
         # Apply max pooling to each column.
         max_vals = np.max(cols_reshaped, axis=(4, 5))
@@ -95,7 +96,9 @@ class MaxPool2D(Layer2D):
                         # Add the gradient to the corresponding input position
                         h_start = i * stride
                         w_start = j * stride
-                        dx[n, c, h_start + max_idx[0], w_start + max_idx[1]] += dout[n, c, i, j]
+                        dx[n, c, h_start + max_idx[0], w_start + max_idx[1]] += dout[
+                            n, c, i, j
+                        ]
 
         # Remove padding if necessary
         if padding > 0:

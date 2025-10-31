@@ -4,9 +4,12 @@ from typing import List, Optional
 import seaborn as sns
 
 
-def plot_confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray,
-                          class_names: Optional[List[str]] = None,
-                          save_path: Optional[str] = None) -> None:
+def plot_confusion_matrix(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    class_names: Optional[List[str]] = None,
+    save_path: Optional[str] = None,
+) -> None:
     """
     Plot the confusion matrix.
 
@@ -30,10 +33,16 @@ def plot_confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray,
 
     # Plot the confusion matrix.
     plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=class_names,
-                yticklabels=class_names)
-    plt.xlabel('Predicted')
-    plt.ylabel('True')
+    sns.heatmap(
+        cm,
+        annot=True,
+        fmt="d",
+        cmap="Blues",
+        xticklabels=class_names,
+        yticklabels=class_names,
+    )
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
 
     if save_path:
         plt.savefig(save_path)
@@ -41,9 +50,13 @@ def plot_confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray,
         plt.show()
 
 
-def plot_curves(train_losses: List[float], val_losses: List[float],
-                train_accs: List[float], val_accs: List[float],
-                save_path: Optional[str] = None) -> None:
+def plot_curves(
+    train_losses: List[float],
+    val_losses: List[float],
+    train_accs: List[float],
+    val_accs: List[float],
+    save_path: Optional[str] = None,
+) -> None:
     """
     Plot the training and validation loss and accuracy curves.
 
@@ -57,22 +70,22 @@ def plot_curves(train_losses: List[float], val_losses: List[float],
     """
     plt.figure(figsize=(12, 4))
     plt.subplot(1, 2, 1)
-    plt.plot(train_losses, label='Train Loss')
+    plt.plot(train_losses, label="Train Loss")
 
     if val_losses:
-        plt.plot(val_losses, label='Validation Loss')
+        plt.plot(val_losses, label="Validation Loss")
 
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
     plt.legend()
     plt.subplot(1, 2, 2)
-    plt.plot(train_accs, label='Train Accuracy')
+    plt.plot(train_accs, label="Train Accuracy")
 
     if val_accs:
-        plt.plot(val_accs, label='Validation Accuracy')
+        plt.plot(val_accs, label="Validation Accuracy")
 
-    plt.xlabel('Epoch')
-    plt.ylabel('Accuracy')
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy")
     plt.legend()
 
     if save_path:
@@ -81,8 +94,9 @@ def plot_curves(train_losses: List[float], val_losses: List[float],
         plt.show()
 
 
-def plot_saliency_map(saliency_map: np.ndarray, save_path: Optional[str] = None
-                      ) -> None:
+def plot_saliency_map(
+    saliency_map: np.ndarray, save_path: Optional[str] = None
+) -> None:
     """
     Plot a saliency map.
 
@@ -92,7 +106,7 @@ def plot_saliency_map(saliency_map: np.ndarray, save_path: Optional[str] = None
                                    is shown.
     """
     plt.figure(figsize=(8, 6))
-    plt.imshow(saliency_map, cmap='hot')
+    plt.imshow(saliency_map, cmap="hot")
     plt.colorbar()
 
     if save_path:

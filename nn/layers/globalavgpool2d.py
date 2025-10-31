@@ -5,6 +5,7 @@ from typing import Optional
 
 class GlobalAvgPool2D(Layer2D):
     """The GlobalAvgPool2D Layer, which performs global average pooling."""
+
     def __init__(self, name: str = "GlobalAvgPool2D") -> None:
         """Initialize the GlobalAvgPool2D layer."""
         super().__init__(name, stride=1, padding=0)
@@ -31,7 +32,7 @@ class GlobalAvgPool2D(Layer2D):
         out = np.mean(x, axis=(2, 3))
 
         # Cache the input for backward pass.
-        self.cache = {'input_shape': x.shape}
+        self.cache = {"input_shape": x.shape}
 
         return out
 
@@ -45,11 +46,11 @@ class GlobalAvgPool2D(Layer2D):
         Returns:
             np.ndarray: The downstream gradient.
         """
-        input_shape = self.cache['input_shape']
+        input_shape = self.cache["input_shape"]
         N, C, H, W = input_shape
 
         # Compute the gradient with respect to the input.
-        dx = np.repeat(dout.repeat(N, C, 1, 1), H*W, axis=2)
+        dx = np.repeat(dout.repeat(N, C, 1, 1), H * W, axis=2)
         dx = dx.reshape(N, C, H, W) / (H * W)
 
         return dx

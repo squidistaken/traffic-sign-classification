@@ -4,13 +4,12 @@ import zipfile
 import logging
 
 # Configure logging.
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 # Set up constants.
-BASE_URL = (
-    "https://sid.erda.dk/public/archives/daaeac0d7ce1152aea9b61d9f1e19370/"
-)
+BASE_URL = "https://sid.erda.dk/public/archives/daaeac0d7ce1152aea9b61d9f1e19370/"
 DATA_DIR = "../data/gtsrb/"
 ZIPS = [
     "GTSRB_Final_Training_Images",
@@ -111,8 +110,7 @@ def clean_data() -> None:
     """
     # 1. Rename `GT_final_test.csv` to `labels.csv`
     os.rename(
-        DATA_DIR + "GTSRB_Final_Test_GT/GT-final_test.csv",
-        DATA_DIR + "labels.csv"
+        DATA_DIR + "GTSRB_Final_Test_GT/GT-final_test.csv", DATA_DIR + "labels.csv"
     )
     os.rmdir(DATA_DIR + "GTSRB_Final_Test_GT/")
 
@@ -121,20 +119,16 @@ def clean_data() -> None:
         os.makedirs(DATA_DIR + "images/")
 
     # 3. Move all images from `Final_Test/Images` into `images`
-    for img in os.listdir(
-        DATA_DIR + "GTSRB_Final_Test_Images/GTSRB/Final_Test/Images"
-    ):
+    for img in os.listdir(DATA_DIR + "GTSRB_Final_Test_Images/GTSRB/Final_Test/Images"):
         os.rename(
-            DATA_DIR + "GTSRB_Final_Test_Images/GTSRB/Final_Test/Images/" +
-            img,
+            DATA_DIR + "GTSRB_Final_Test_Images/GTSRB/Final_Test/Images/" + img,
             DATA_DIR + "images/" + img,
         )
 
     # 4. Delete `Final_Test` directory
     os.rmdir(DATA_DIR + "GTSRB_Final_Test_Images/GTSRB/Final_Test/Images/")
     os.rmdir(DATA_DIR + "GTSRB_Final_Test_Images/GTSRB/Final_Test/")
-    os.remove(DATA_DIR +
-              "GTSRB_Final_Test_Images/GTSRB/Readme-Images-Final-test.txt")
+    os.remove(DATA_DIR + "GTSRB_Final_Test_Images/GTSRB/Readme-Images-Final-test.txt")
     os.rmdir(DATA_DIR + "GTSRB_Final_Test_Images/GTSRB/")
     os.rmdir(DATA_DIR + "GTSRB_Final_Test_Images/")
 
@@ -160,8 +154,8 @@ def clean_data() -> None:
         # b. Append `GT-XXXXX.csv` to `labels.csv`
         label_file = (
             DATA_DIR
-            + "GTSRB_Final_Training_Images/GTSRB/Final_Training/Images/" +
-            f"{subdir}/GT-{subdir}.csv"
+            + "GTSRB_Final_Training_Images/GTSRB/Final_Training/Images/"
+            + f"{subdir}/GT-{subdir}.csv"
         )
 
         with (
@@ -177,8 +171,7 @@ def clean_data() -> None:
         os.rmdir(subdir_path)
 
     # 6. Delete `Final_Training` directory
-    os.rmdir(DATA_DIR +
-             "GTSRB_Final_Training_Images/GTSRB/Final_Training/Images/")
+    os.rmdir(DATA_DIR + "GTSRB_Final_Training_Images/GTSRB/Final_Training/Images/")
     os.rmdir(DATA_DIR + "GTSRB_Final_Training_Images/GTSRB/Final_Training/")
     os.remove(DATA_DIR + "GTSRB_Final_Training_Images/GTSRB/Readme-Images.txt")
     os.rmdir(DATA_DIR + "GTSRB_Final_Training_Images/GTSRB/")

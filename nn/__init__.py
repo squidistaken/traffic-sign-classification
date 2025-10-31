@@ -1,11 +1,14 @@
 from .activations import relu, softmax, sigmoid, tanh
-from .checks import (check_data_shape, check_data_range,
-                     check_model_convergence, check_model_performance)
+from .checks import (
+    check_data_shape,
+    check_data_range,
+    check_model_convergence,
+    check_model_performance,
+)
 from .loss import cross_entropy
 from .optim import SGD, Adam, Momentum
 from .sched import StepLRScheduler, WarmupLRScheduler, CosineLRScheduler
-from .utils import (image_to_column, column_to_image, one_hot_encode,
-                    compute_accuracy)
+from .utils import image_to_column, column_to_image, one_hot_encode, compute_accuracy
 from . import layers
 import numpy as np
 

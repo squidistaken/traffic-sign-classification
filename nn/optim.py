@@ -7,9 +7,13 @@ from .layers.base_layers import Layer
 # region Abstract Optimizer
 class Optimizer(ABC):
     """Abstract Base Class for Optimisers"""
-    def __init__(self,
-                 raw_params: list[Tuple[Layer, str, np.ndarray]] | list[Dict],
-                 lr: float = 0.001, weight_decay: float = 0.0,) -> None:
+
+    def __init__(
+        self,
+        raw_params: list[Tuple[Layer, str, np.ndarray]] | list[Dict],
+        lr: float = 0.001,
+        weight_decay: float = 0.0,
+    ) -> None:
         """Initialise the Optimiser class.
 
         Args:
@@ -20,8 +24,7 @@ class Optimizer(ABC):
             weight_decay (float, optional): The weight decay (L2 penalty).
                                             Defaults to 0.0.
         """
-        self.param_groups = self._make_param_groups(raw_params, lr,
-                                                    weight_decay)
+        self.param_groups = self._make_param_groups(raw_params, lr, weight_decay)
         # Per-parameter state dictionaries
         self.state = {}
 
@@ -38,10 +41,11 @@ class Optimizer(ABC):
                 grad.fill(0.0)
 
     def _make_param_groups(
-            self,
-            raw_params: list[Tuple[Layer, str, np.ndarray]] | list[Dict],
-            lr: float,
-            weight_decay: float) -> list[Dict[str, Any]]:
+        self,
+        raw_params: list[Tuple[Layer, str, np.ndarray]] | list[Dict],
+        lr: float,
+        weight_decay: float,
+    ) -> list[Dict[str, Any]]:
         """Turn the raw parameters inputs into a standardised structure.
 
         Args:
@@ -68,12 +72,14 @@ class Optimizer(ABC):
         if isinstance(raw_params, list):
             # Case 1: params is a list of (layer, name, array) tuples.
             if all(isinstance(p, tuple) and len(p) == 3 for p in raw_params):
-                param_groups.append({
-                    "params": raw_params,
-                    "lr": lr,
-                    "weight_decay": weight_decay,
-                })
-        # Case 2: params is already a list of a dictionary.
+                param_groups.append(
+                    {
+                        "params": raw_params,
+                        "lr": lr,
+                        "weight_decay": weight_decay,
+                    }
+                )
+            # Case 2: params is already a list of a dictionary.
             elif all(isinstance(p, dict) for p in raw_params):
                 for group in raw_params:
                     group_copy = group.copy()
@@ -94,12 +100,15 @@ class Optimizer(ABC):
             raise ValueError("Parameters must be a list.")
 
         return param_groups
+
+
 # endregion
 
 
 # region SGD Optimizer
 class SGD(Optimizer):
     """The Stochastic Gradient Descent optimiser class."""
+
     def step(self) -> None:
         """Perform a single optimisation step."""
         for group in self.param_groups:
@@ -117,6 +126,8 @@ class SGD(Optimizer):
 
                 # theta = theta - lr * (grad + weight_decay * theta).
                 parameters -= lr * upd
+
+
 # endregion
 
 
@@ -158,15 +169,17 @@ class Adam(Optimizer):
                 t += 1
                 state["t"] = t
                 m[:] = beta1 * m + (1 - beta1) * grad
-                v[:] = beta2 * v + (1 - beta2) * (grad ** 2)
+                v[:] = beta2 * v + (1 - beta2) * (grad**2)
 
                 # Compute bias-corrected moment estimates
-                m_hat = m / (1 - beta1 ** t)
-                v_hat = v / (1 - beta2 ** t)
+                m_hat = m / (1 - beta1**t)
+                v_hat = v / (1 - beta2**t)
 
                 # Parameter update
                 upd = m_hat / (np.sqrt(v_hat) + epsilon)
                 parameters -= lr * upd
+
+
 # endregion
 
 
@@ -192,9 +205,7 @@ class Momentum(Optimizer):
 
                 # Initialize per-parameter state if not there
                 if (layer, name) not in self.state:
-                    self.state[(layer, name)] = {
-                        "v": np.zeros_like(parameters)
-                    }
+                    self.state[(layer, name)] = {"v": np.zeros_like(parameters)}
 
                 state = self.state[(layer, name)]
                 v = state["v"]
@@ -204,4 +215,6 @@ class Momentum(Optimizer):
 
                 # Update parameters.
                 parameters -= lr * v
+
+
 # endregion

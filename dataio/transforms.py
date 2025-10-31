@@ -5,6 +5,7 @@ from PIL import Image
 
 class ToCompose:
     """The ToCompose Transform Class to combine multiple transforms."""
+
     def __init__(self, transforms: Tuple) -> None:
         """Initialize the Compose transform.
 
@@ -30,6 +31,7 @@ class ToCompose:
 
 class ToResize:
     """The ToResize Transform Class to resize images."""
+
     def __init__(self, size: int) -> None:
         """Initialize the Resize transform.
 
@@ -55,6 +57,7 @@ class ToResize:
 
 class ToCenterCrop:
     """The ToCenterCrop Transform Class to crop images to a square."""
+
     def __init__(self, size: int) -> None:
         """Initialize the CenterCrop transform.
 
@@ -77,14 +80,14 @@ class ToCenterCrop:
         start_x = (width - self.size) // 2
         start_y = (height - self.size) // 2
         # Crop the image.
-        cropped_img = x[start_y:start_y + self.size,
-                        start_x:start_x + self.size]
+        cropped_img = x[start_y : start_y + self.size, start_x : start_x + self.size]
 
         return cropped_img
 
 
 class ToGrayscale:
     """The ToGrayscale Transform Class to convert images to grayscale."""
+
     def __call__(self, x: np.ndarray) -> np.ndarray:
         """Call the ToGrayscale transform on the input.
 
@@ -106,6 +109,7 @@ class ToGrayscale:
 
 class ToTensor:
     """The ToTensor Transform Class to convert images to tensors."""
+
     def __call__(self, x: np.ndarray) -> np.ndarray:
         """Call the ToTensor transform on the input.
 
@@ -121,6 +125,7 @@ class ToTensor:
 
 class ToNormalize:
     """The ToNormalize Transform Class to normalize images."""
+
     def __init__(
         self, mean: Tuple[float, float, float], std: Tuple[float, float, float]
     ) -> None:
@@ -149,6 +154,7 @@ class ToNormalize:
 
 class ToRotate:
     """The ToRotate Transform Class to rotate images."""
+
     def __init__(self, angle: float) -> None:
         """Initialize the Rotate transform.
 
@@ -174,6 +180,7 @@ class ToRotate:
 
 class ToNoise:
     """The ToNoise Transform Class to add Gaussian noise to images."""
+
     def __init__(self, mean=0, std=0.1):
         """
         Initialize the Noise transform.
