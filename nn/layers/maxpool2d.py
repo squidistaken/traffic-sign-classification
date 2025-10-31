@@ -102,4 +102,3 @@ class MaxPool2D(Layer2D):
             dx = dx[:, :, padding:-padding, padding:-padding]
 
         return dx
-

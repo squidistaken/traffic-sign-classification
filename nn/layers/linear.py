@@ -44,8 +44,12 @@ class Linear(Layer):
         else:
             self.b = b
 
-        self.dW = np.zeros_like(self.W)
-        self.db = np.zeros_like(self.b)
+        # Store these just to be sure
+        self.in_features = in_features
+        self.out_features = out_features
+
+        self.grad_weights = np.zeros_like(self.W)
+        self.grad_biases = np.zeros_like(self.b)
 
         # Store input for backward pass.
         self.cache_x: Optional[np.ndarray] = None
@@ -83,8 +87,8 @@ class Linear(Layer):
         x = self.cache_x
 
         # The batch is averaged over in gradient calculations.
-        self.dW = (x.T @ dout) / x.shape[0]
-        self.db = dout.mean(axis=0)
+        self.grad_weights = (x.T @ dout) / x.shape[0]
+        self.grad_biases = dout.mean(axis=0)
         dx = dout @ self.W.T
 
         return dx
@@ -96,7 +100,7 @@ class Linear(Layer):
         Returns:
             list[np.ndarray]: The list of parameters.
         """
-        return [self.W, self.b]
+        return [("weights", self.W), ("biases", self.b)]
 
     def grads(self) -> list[np.ndarray]:
         """
@@ -105,7 +109,7 @@ class Linear(Layer):
         Returns:
             list[np.ndarray]: The list of gradients.
         """
-        return [self.dW, self.db]
+        return [("weights", self.grad_weights), ("biases", self.grad_biases)]
 
     def output_shape(self, input_shape: tuple) -> tuple:
         """

@@ -6,8 +6,9 @@ from ..utils import image_to_column, column_to_image
 
 class Conv2D(Layer2D):
     """The Conv2D Layer, which performs a 2D convolution operation."""
-    def __init__(self, in_channels: int, out_channels: int, kernel_size: int,
-                 stride: int = 1, padding: int = 0, name: str = "Conv2D") -> None:
+    def __init__(self, in_channels: int, out_channels: int,
+                 kernel_size: int, stride: int = 1,
+                 padding: int = 0, name: str = "Conv2D") -> None:
         """Initialize Conv2D layer.
 
         Args:
@@ -30,8 +31,8 @@ class Conv2D(Layer2D):
         self.biases = np.zeros(out_channels)
 
         # Gradients
-        self.dweights = np.zeros_like(self.weights)
-        self.dbiases = np.zeros_like(self.biases)
+        self.grad_weights = np.zeros_like(self.weights)
+        self.grad_biases = np.zeros_like(self.biases)
 
         # Cache for backward pass
         self.cache: Optional[dict] = None
@@ -89,12 +90,12 @@ class Conv2D(Layer2D):
         _, _, out_H, out_W = dout.shape
 
         # Compute the gradient with respect to the biases.
-        self.dbiases = np.sum(dout, axis=(0, 2, 3))
+        self.grad_biases = np.sum(dout, axis=(0, 2, 3))
 
         # Compute the gradient with respect to the weights.
         dout_reshaped = dout.transpose(1, 0, 2, 3).reshape(F, -1)
-        self.dweights = dout_reshaped @ cols.T
-        self.dweights = self.dweights.reshape(F, C, HH, WW)
+        self.grad_weights = dout_reshaped @ cols.T
+        self.grad_weights = self.grad_weights.reshape(F, C, HH, WW)
 
         # Compute the gradient with respect to the input.
         weights_matrix = self.weights.reshape(F, -1)
@@ -110,7 +111,7 @@ class Conv2D(Layer2D):
         Returns:
             list[np.ndarray]: The list of parameters.
         """
-        return [self.weights, self.biases]
+        return [("weights", self.weights), ("biases", self.biases)]
 
     def grads(self) -> list[np.ndarray]:
         """
@@ -119,7 +120,7 @@ class Conv2D(Layer2D):
         Returns:
             list[np.ndarray]: The list of gradients.
         """
-        return [self.dweights, self.dbiases]
+        return [("weights", self.grad_weights), ("biases", self.grad_biases)]
 
     def output_shape(self, input_shape: tuple) -> tuple:
         """

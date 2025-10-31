@@ -26,8 +26,8 @@ class BatchNorm2D(Layer2D):
         self.beta = np.zeros(num_channels)
 
         # Initialize gradients.
-        self.dgamma = np.zeros_like(self.gamma)
-        self.dbeta = np.zeros_like(self.beta)
+        self.grad_gamma = np.zeros_like(self.gamma)
+        self.grad_beta = np.zeros_like(self.beta)
 
         # Initialize the running mean and variance.
         self.running_mean = np.zeros(num_channels)
@@ -89,20 +89,21 @@ class BatchNorm2D(Layer2D):
         x_norm = self.cache['x_norm']
         mean = self.cache['mean']
         var = self.cache['var']
-        N, C, H, W = x.shape
+        N, C, _, _ = x.shape
         # Compute gradients.
-        self.dgamma = np.sum(dout * x_norm, axis=(0, 2, 3))
-        self.dbeta = np.sum(dout, axis=(0, 2, 3))
+        self.grad_gamma = np.sum(dout * x_norm, axis=(0, 2, 3))
+        self.grad_beta = np.sum(dout, axis=(0, 2, 3))
         dx_norm = dout * self.gamma.reshape(1, C, 1, 1)
         dvar = np.sum(dx_norm * (x - mean.reshape(1, C, 1, 1)) *
-                    -0.5 * (var.reshape(1, C, 1, 1) + self.epsilon) ** -1.5,
-                    axis=(0, 2, 3))
+                      -0.5 * (var.reshape(1, C, 1, 1) + self.epsilon) ** -1.5,
+                      axis=(0, 2, 3))
         dmean = (np.sum(dx_norm * -1 /
                         np.sqrt(var.reshape(1, C, 1, 1) + self.epsilon),
                         axis=(0, 2, 3)) + dvar * -2 * np.mean(
                             x - mean.reshape(1, C, 1, 1), axis=(0, 2, 3)))
         dx = (dx_norm / np.sqrt(var.reshape(1, C, 1, 1) + self.epsilon) +
-            dvar.reshape(1, C, 1, 1) * 2 * (x - mean.reshape(1, C, 1, 1)) / N + dmean.reshape(1, C, 1, 1) / N)
+              dvar.reshape(1, C, 1, 1) * 2 * (x - mean.reshape(1, C, 1, 1)) / N
+              + dmean.reshape(1, C, 1, 1) / N)
         return dx
 
     def params(self) -> list[np.ndarray]:
@@ -112,7 +113,7 @@ class BatchNorm2D(Layer2D):
         Returns:
             list[np.ndarray]: The list of parameters.
         """
-        return [self.gamma, self.beta]
+        return [("gamma", self.gamma), ("beta", self.beta)]
 
     def grads(self) -> list[np.ndarray]:
         """
@@ -121,7 +122,7 @@ class BatchNorm2D(Layer2D):
         Returns:
             list[np.ndarray]: The list of gradients.
         """
-        return [self.dgamma, self.dbeta]
+        return [("gamma", self.grad_gamma), ("beta", self.grad_beta)]
 
     def output_shape(self, input_shape: tuple[int, int, int, int]
                      ) -> tuple[int, int, int, int]:
