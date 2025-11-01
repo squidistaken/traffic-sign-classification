@@ -3,8 +3,10 @@ from typing import Iterator, Callable, List, Optional, Tuple
 from concurrent.futures import ThreadPoolExecutor
 from .gtsrb_dataset import GTSRBDataset
 
+
 class DataLoader:
     """DataLoader for GTSRB dataset with prefetching and parallel data loading."""
+
     def __init__(
         self,
         dataset: GTSRBDataset,
@@ -96,7 +98,9 @@ class DataLoader:
         # Initialize prefetch buffer
         self.prefetch_buffer = []
         # Prefetch initial batches
-        for start in range(0, min(n, (self.prefetch_batches + 1) * self.batch_size), self.batch_size):
+        for start in range(
+            0, min(n, (self.prefetch_batches + 1) * self.batch_size), self.batch_size
+        ):
             end = start + self.batch_size
             if end > n:
                 if self.drop_last:

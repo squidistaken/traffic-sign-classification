@@ -3,6 +3,7 @@ import os
 from logger import Logger
 from typing import Tuple, List, Any
 
+
 def train(
     model: Any,
     train_loader: Any,
@@ -33,7 +34,9 @@ def train(
         n_train_samples = 0
         # Shuffle training data
         for b_data, b_labels in train_loader:
-            logger.log_debug(f"Processing training batch with {b_data.shape[0]} samples.")
+            logger.log_debug(
+                f"Processing training batch with {b_data.shape[0]} samples."
+            )
             n_train_samples += b_data.shape[0]
             # Reset optimiser gradients
             optimiser.zero_grad()
@@ -49,7 +52,9 @@ def train(
             epoch_train_loss += loss * b_data.shape[0]
             preds = np.argmax(output, axis=1)
             epoch_train_acc += np.sum(preds == b_labels)
-            logger.log_debug(f"Training batch accuracy: {np.sum(preds == b_labels) / b_data.shape[0]}")
+            logger.log_debug(
+                f"Training batch accuracy: {np.sum(preds == b_labels) / b_data.shape[0]}"
+            )
         # Average metrics
         epoch_train_loss /= n_train_samples
         epoch_train_acc /= n_train_samples
@@ -64,7 +69,9 @@ def train(
             epoch_val_acc = 0.0
             n_val_samples = 0
             for b_data, b_labels in val_loader:
-                logger.log_debug(f"Processing validation batch with {b_data.shape[0]} samples.")
+                logger.log_debug(
+                    f"Processing validation batch with {b_data.shape[0]} samples."
+                )
                 n_val_samples += b_data.shape[0]
                 output = model.forward(b_data, training=False)
                 loss, _ = loss_fn(output, b_labels)
@@ -72,7 +79,9 @@ def train(
                 epoch_val_loss += loss * b_data.shape[0]
                 preds = np.argmax(output, axis=1)
                 epoch_val_acc += np.sum(preds == b_labels)
-                logger.log_debug(f"Validation batch accuracy: {np.sum(preds == b_labels) / b_data.shape[0]}")
+                logger.log_debug(
+                    f"Validation batch accuracy: {np.sum(preds == b_labels) / b_data.shape[0]}"
+                )
             epoch_val_loss /= n_val_samples
             epoch_val_acc /= n_val_samples
             val_losses.append(epoch_val_loss)

@@ -7,8 +7,13 @@ from ..utils import image_to_column, column_to_image
 class MaxPool2D(Layer2D):
     """The MaxPool2D Layer, which performs 2D max pooling."""
 
-    def __init__(self, pool_size: int, stride: Optional[int] = None,
-                 padding: int = 0, name: str = "MaxPool2D") -> None:
+    def __init__(
+        self,
+        pool_size: int,
+        stride: Optional[int] = None,
+        padding: int = 0,
+        name: str = "MaxPool2D",
+    ) -> None:
         if stride is None:
             stride = pool_size
         super().__init__(stride, padding, name)
@@ -30,9 +35,9 @@ class MaxPool2D(Layer2D):
 
         # Max pooling
         max_idx = np.argmax(cols_reshaped, axis=1)
-        out = cols_reshaped[np.arange(C)[:, None],
-                            max_idx,
-                            np.arange(N * out_H * out_W)[None, :]]
+        out = cols_reshaped[
+            np.arange(C)[:, None], max_idx, np.arange(N * out_H * out_W)[None, :]
+        ]
         out = out.reshape(N, C, out_H, out_W)
 
         # Cache for backward
@@ -42,7 +47,7 @@ class MaxPool2D(Layer2D):
             "cols_reshaped": cols_reshaped,
             "max_idx": max_idx,
             "out_H": out_H,
-            "out_W": out_W
+            "out_W": out_W,
         }
 
         return out
@@ -61,9 +66,7 @@ class MaxPool2D(Layer2D):
 
         # Backprop into columns
         dcols = np.zeros_like(cols_reshaped)
-        np.put_along_axis(dcols, max_idx[:, None, :],
-                          dout_flat[:, None, :],
-                          axis=1)
+        np.put_along_axis(dcols, max_idx[:, None, :], dout_flat[:, None, :], axis=1)
 
         # Reshape back to 2D column shape
         dcols = dcols.reshape(C * pool_H * pool_W, N * out_H * out_W)

@@ -4,8 +4,10 @@ import os
 import csv
 from concurrent.futures import ThreadPoolExecutor
 
+
 class GTSRBDataset:
     """German Traffic Sign Recognition Benchmark Dataset Class."""
+
     def __init__(
         self,
         root: str = "data/gtsrb/",
@@ -134,6 +136,7 @@ class GTSRBDataset:
         """Clean up the executor when the dataset is deleted."""
         self.executor.shutdown(wait=False)
 
+
 def tests() -> None:
     """Run tests for GTSRBDataset class."""
     # Test with a small subset of indices
@@ -162,6 +165,7 @@ def tests() -> None:
     for i in range(len(dataset_no_transform)):
         img, label = dataset_no_transform[i]
         print(f"Image shape (no transform): {img.shape}, Label: {label}")
+
 
 if __name__ == "__main__":
     tests()

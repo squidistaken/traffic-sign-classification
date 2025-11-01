@@ -1,8 +1,10 @@
 import logging
 import os
 
+
 class Logger:
     """Logger class."""
+
     def __init__(self, log_dir: str = "logs", log_file: str = "training.log"):
         """
         Initialise the logger.
@@ -29,7 +31,9 @@ class Logger:
         console_handler.setLevel(logging.DEBUG)
 
         # Create a formatter and add it to the handlers
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
         file_handler.setFormatter(formatter)
         console_handler.setFormatter(formatter)
 
