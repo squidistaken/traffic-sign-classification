@@ -67,15 +67,15 @@ class Layer(ABC):
         pass
 
     @abstractmethod
-    def output_shape(self, input_shape: tuple) -> tuple:
+    def output_shape(self, input_shape: Tuple) -> Tuple:
         """
         Compute the output shape given the input shape.
 
         Args:
-            input_shape (tuple): The shape of the input.
+            input_shape (Tuple): The shape of the input.
 
         Returns:
-            tuple: The shape of the output.
+            Tuple: The shape of the output.
         """
         pass
 
