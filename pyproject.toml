@@ -16,4 +16,5 @@ dependencies = [
     "tqdm",
     "black",
     "black[jupyter]",
+    "importlib>=1.0.4",
 ]
