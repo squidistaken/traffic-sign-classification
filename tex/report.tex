@@ -108,6 +108,13 @@ The images themselves are presented as PPM files with varying resolution and asp
   \label{color-histogram}
 \end{figure}
 
+\begin{figure}
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/class_distribution.png}
+  \caption{Class distribution of the GTSRB dataset. The dataset is imbalanced, with the smallest class having 270 images and the largest 3000. The mean is 1206 images per class.}
+  \label{class-distribution}
+\end{figure}
+
 We load the data as a numpy array of shape (H, W, C) for each image, where H is height, W is width, and C is the color channel (so three). The labels are loaded as integers corresponding to the class IDs. Before feeding the images to the model, we normalize the pixel values to the range [0, 1] by dividing by 255.
 
 \begin{itemize}
