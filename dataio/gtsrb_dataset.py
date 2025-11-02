@@ -3,7 +3,7 @@ import numpy as np
 import os
 import csv
 from concurrent.futures import ThreadPoolExecutor
-from PIL import Imagefrom PIL import Image
+from PIL import Image
 
 class GTSRBDataset:
     """German Traffic Sign Recognition Benchmark Dataset Class."""
