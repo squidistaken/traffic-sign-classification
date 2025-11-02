@@ -153,18 +153,18 @@ class ToNormalize:
 
 
 class ToRotate:
-    """The ToRotate Transform Class to rotate images."""
+    """The ToRotate Transform Class to rotate images randomly up to a certain angle."""
 
     def __init__(self, angle: float) -> None:
         """Initialize the Rotate transform.
 
         Args:
-            angle (float): The angle to rotate the image by.
+            angle (float): The maximum angle to rotate the image by.
         """
         self.angle = angle
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
-        """Call the Rotate transform on the input.
+        """Call the Rotate transform on the input with a random angle.
 
         Args:
             x (np.ndarray): The input image array.
@@ -172,8 +172,9 @@ class ToRotate:
         Returns:
             np.ndarray: The rotated image array.
         """
+        angle = np.random.uniform(-self.angle, self.angle)
         img = Image.fromarray(x)
-        img = img.rotate(self.angle)
+        img = img.rotate(angle)
 
         return np.array(img)
 
