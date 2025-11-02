@@ -3,7 +3,6 @@ import os
 from logger import Logger
 from typing import Tuple, List, Any
 
-
 def train(
     model: Any,
     train_loader: Any,

@@ -1,10 +1,8 @@
 import logging
 import os
 
-
 class Logger:
     """Logger class."""
-
     def __init__(self, log_dir: str = "logs", log_file: str = "training.log"):
         """
         Initialise the logger.
