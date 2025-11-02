@@ -49,23 +49,11 @@ class Concat(Layer):
             start += shape[self.axis]
         return gradients
 
-    def params(self) -> list[np.ndarray]:
-        """
-        Define the parameters of the layer.
+    def params(self):
+        return {}
 
-        Returns:
-            list[np.ndarray]: The list of parameters.
-        """
-        return []
-
-    def grads(self) -> list[np.ndarray]:
-        """
-        Define the gradients of the layer.
-
-        Returns:
-            list[np.ndarray]: The list of gradients.
-        """
-        return []
+    def grads(self):
+        return {}
 
     def output_shape(self, input_shapes: list[tuple]) -> tuple:
         """

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from typing import Tuple
+from typing import Tuple, Dict
 
 
 # region Layer
@@ -47,22 +47,22 @@ class Layer(ABC):
         pass
 
     @abstractmethod
-    def params(self) -> list[np.ndarray]:
+    def params(self) -> Dict[str, np.ndarray]:
         """
-        Define the parameters of the layer.
+        Return the learnable parameters of the layer.
 
         Returns:
-            list[np.ndarray]: The list of parameters.
+            Dict[str, np.ndarray]: A dictionary mapping parameter names to their values.
         """
         pass
 
     @abstractmethod
-    def grads(self) -> list[np.ndarray]:
+    def grads(self) -> Dict[str, np.ndarray]:
         """
-        Define the gradients of the layer.
+        Return the gradients of the learnable parameters.
 
         Returns:
-            list[np.ndarray]: The list of gradients.
+            Dict[str, np.ndarray]: A dictionary mapping parameter names to their gradients.
         """
         pass
 
@@ -150,23 +150,25 @@ class Layer2D(Layer):
         return (N, C, out_H, out_W)
     
 
-    def params(self) -> list[np.ndarray]:
+    def params(self) -> dict[str, np.ndarray]:
         """
-        Define the parameters of the layer.
+        Define the parameters of the 2D layer.
 
         Returns:
-            list[np.ndarray]: The list of parameters.
+            dict[str, np.ndarray]: An empty dictionary since base 2D layers
+                                   may not have learnable parameters.
         """
-        return []
+        return {}
 
-    def grads(self) -> list[np.ndarray]:
+    def grads(self) -> dict[str, np.ndarray]:
         """
-        Define the gradients of the layer.
+        Define the gradients of the 2D layer.
 
         Returns:
-            list[np.ndarray]: The list of gradients.
+            dict[str, np.ndarray]: An empty dictionary since base 2D layers
+                                   may not have learnable gradients.
         """
-        return []
+        return {}
 
 
     def pad_input(self, x: np.ndarray) -> np.ndarray:

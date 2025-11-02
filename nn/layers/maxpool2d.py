@@ -75,3 +75,9 @@ class MaxPool2D(Layer2D):
         dx = column_to_image(dcols, x.shape, pool_H, stride, padding)
 
         return dx
+    
+    def params(self):
+        return {}
+
+    def grads(self):
+        return {}

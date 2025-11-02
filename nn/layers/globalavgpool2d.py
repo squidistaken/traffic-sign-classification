@@ -68,3 +68,9 @@ class GlobalAvgPool2D(Layer2D):
         N, C, H, W = input_shape
 
         return (N, C, 1, 1)
+
+    def params(self):
+        return {}
+
+    def grads(self):
+        return {}

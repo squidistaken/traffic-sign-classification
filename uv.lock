@@ -1251,6 +1251,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "black" },
     { name = "black", extras = ["jupyter"] },
     { name = "ipykernel" },
     { name = "logging", specifier = ">=0.4.9.6" },

@@ -47,33 +47,20 @@ class Sequential(Layer):
 
         return dout
 
-    def params(self) -> list[np.ndarray]:
-        """
-        Define the parameters of the layer.
-
-        Returns:
-            list[np.ndarray]: The list of parameters.
-        """
-        params = []
-
-        for layer in self.layers:
-            params.extend(layer.params())
-
+    def params(self):
+        params = {}
+        for i, layer in enumerate(self.layers):
+            for name, value in layer.params().items():
+                params[f"layer{i}_{name}"] = value
         return params
 
-    def grads(self) -> list[np.ndarray]:
-        """
-        Define the gradients of the layer.
-
-        Returns:
-            list[np.ndarray]: The list of gradients.
-        """
-        grads = []
-
-        for layer in self.layers:
-            grads.extend(layer.grads())
-
+    def grads(self):
+        grads = {}
+        for i, layer in enumerate(self.layers):
+            for name, value in layer.grads().items():
+                grads[f"layer{i}_{name}"] = value
         return grads
+
 
     def output_shape(self, input_shape: tuple) -> tuple:
         """

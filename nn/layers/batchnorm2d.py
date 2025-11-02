@@ -120,23 +120,12 @@ class BatchNorm2D(Layer2D):
         )
         return dx
 
-    def params(self) -> list[np.ndarray]:
-        """
-        Define the parameters of the layer.
+    def params(self):
+        return {"gamma": self.gamma, "beta": self.beta}
 
-        Returns:
-            list[np.ndarray]: The list of parameters.
-        """
-        return [("gamma", self.gamma), ("beta", self.beta)]
+    def grads(self):
+        return {"dgamma": self.grad_gamma, "dbeta": self.grad_beta}
 
-    def grads(self) -> list[np.ndarray]:
-        """
-        Define the gradients of the layer.
-
-        Returns:
-            list[np.ndarray]: The list of gradients.
-        """
-        return [("gamma", self.grad_gamma), ("beta", self.grad_beta)]
 
     def output_shape(
         self, input_shape: tuple[int, int, int, int]
