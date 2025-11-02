@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 import numpy as np
 from PIL import Image
 
@@ -6,7 +6,7 @@ from PIL import Image
 class ToCompose:
     """The ToCompose Transform Class to combine multiple transforms."""
 
-    def __init__(self, transforms: Tuple) -> None:
+    def __init__(self, transforms: List) -> None:
         """Initialize the Compose transform.
 
         Args:
