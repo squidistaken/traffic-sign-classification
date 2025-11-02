@@ -13,36 +13,40 @@ from . import layers
 import numpy as np
 
 
-def xavier_init(shape: tuple[int, int]) -> np.ndarray:
+def xavier_init(shape: tuple) -> np.ndarray:
     """
     Xavier (Glorot) initialisation for weights.
-
     Args:
-        shape (tuple[int, int]): The shape of the weight matrix.
-
+        shape (tuple): The shape of the weight matrix.
     Returns:
         np.ndarray: The initialised weights.
     """
-    n_in, n_out = shape
+    if len(shape) == 2:
+        n_in, n_out = shape
+    else:
+        # For convolutional layers, consider the number of input channels and kernel size
+        n_in = shape[1] * np.prod(shape[2:])
+        n_out = shape[0]
     var = 2.0 / (n_in + n_out)
-
     return np.random.normal(0.0, np.sqrt(var), shape)
 
 
-def he_init(shape: tuple[int, int]) -> np.ndarray:
+def he_init(shape: tuple) -> np.ndarray:
     """
     He initialization for weights.
-
     Args:
-        shape (tuple[int, int]): The shape of the weight matrix.
-
+        shape (tuple): The shape of the weight matrix.
     Returns:
-        np.ndarray: The initialised weights
+        np.ndarray: The initialised weights.
     """
-    n_in, _ = shape
+    if len(shape) == 2:
+        n_in, _ = shape
+    else:
+        # For convolutional layers, consider the number of input channels and kernel size
+        n_in = shape[1] * np.prod(shape[2:])
     var = 2.0 / n_in
-
     return np.random.normal(0.0, np.sqrt(var), shape)
+
 
 
 __all__ = [

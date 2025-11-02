@@ -17,4 +17,6 @@ dependencies = [
     "black",
     "black[jupyter]",
     "importlib>=1.0.4",
+    "torch>=2.9.0",
+    "torchvision>=0.24.0",
 ]

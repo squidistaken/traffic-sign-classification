@@ -1,4 +1,5 @@
 from typing import Any, Tuple
+import numpy as np
 
 
 def evaluate(
@@ -82,3 +83,20 @@ def evaluate_corruption(
         print(f"Corrupted Test Loss: {avg_loss:.4f}, Corrupted Test Accuracy: {avg_acc:.4f}")
 
     return avg_loss, avg_acc
+
+
+def predict(model, data_loader):
+    """
+    Generate predictions for a dataset using a custom DataLoader.
+    Args:
+        model (Any): The neural network model.
+        data_loader (Any): Iterable yielding batches of data.
+    Returns:
+        np.ndarray: Array of predicted labels.
+    """
+    predictions_list = []
+    for batch_data, _ in data_loader:
+        output = model.forward(batch_data, False)
+        pred = output.argmax(axis=1)
+        predictions_list.append(pred)
+    return np.concatenate(predictions_list)

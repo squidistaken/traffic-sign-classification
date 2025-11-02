@@ -1,14 +1,12 @@
 import numpy as np
-from typing import Optional
+from typing import Optional, Callable
 from .base_layers import Layer
-
 
 class Linear(Layer):
     """
     The Linear (Fully Connected) Layer, which performs an affine
     transformation on the input data.
     """
-
     def __init__(
         self,
         in_features: int,
@@ -16,11 +14,11 @@ class Linear(Layer):
         W: Optional[np.ndarray] = None,
         b: Optional[np.ndarray] = None,
         name: str = "Linear",
+        weight_init: Optional[Callable] = None
     ) -> None:
         """
         Initialize the Linear layer. If the weight matrix W or bias b
         are not provided, they are initialized randomly.
-
         Args:
             in_features (int): The number of input features.
             out_features (int): The number of output features.
@@ -28,29 +26,29 @@ class Linear(Layer):
                                                 Defaults to None.
             b (Optional[np.ndarray], optional): The bias vector.
                                                 Defaults to None.
+            weight_init (Optional[Callable]): A function to initialize the weights.
         """
-        super().__init__(name)
-
+        super().__init__(name, weight_init)
         if W is None:
-            # The initialization uses He initialization for weights. This is
-            # particularly effective when using ReLU activations.
-            self.W = np.random.randn(in_features, out_features) * np.sqrt(
-                2 / in_features
-            )
+            if weight_init is not None:
+                self.W = weight_init((in_features, out_features))
+            else:
+                # The initialization uses He initialization for weights. This is
+                # particularly effective when using ReLU activations.
+                self.W = np.random.randn(in_features, out_features) * np.sqrt(
+                    2 / in_features
+                )
         else:
             self.W = W
         if b is None:
             self.b = np.zeros(out_features)
         else:
             self.b = b
-
         # Store these just to be sure
         self.in_features = in_features
         self.out_features = out_features
-
         self.grad_weights = np.zeros_like(self.W)
         self.grad_biases = np.zeros_like(self.b)
-
         # Store input for backward pass.
         self.cache_x: Optional[np.ndarray] = None
 
