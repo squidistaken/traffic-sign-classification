@@ -64,3 +64,16 @@ def class_balanced_cross_entropy(
     grad /= sample_weights.sum()
 
     return loss, grad
+
+
+def mse(logits: np.ndarray, targets: np.ndarray) -> Tuple[float, np.ndarray]:
+    # Reshape targets to match the shape of logits
+    reshaped_targets = targets.reshape(-1, 1)
+
+    # Calculate the squared differences
+    grad = (logits - reshaped_targets) ** 2
+
+    # Compute the mean of squared differences
+    loss = np.mean(grad)
+
+    return loss, grad

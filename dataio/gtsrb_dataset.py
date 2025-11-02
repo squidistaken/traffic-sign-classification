@@ -9,11 +9,11 @@ class GTSRBDataset:
     """German Traffic Sign Recognition Benchmark Dataset Class."""
     def __init__(
         self,
-        root: str = "data/gtsrb/",
+        root: str = "./data/gtsrb/",
         x_dir: str = "images/",
         labels: str = "labels.csv",
         indices: List[int] = [],
-        split: Literal["train", "val", "test"] = "train",
+        split: Literal["train", "val", "test"] = None,
         transforms: Optional[Callable] = None,
         cache: bool = False,  # Enable caching
         num_workers: int = 4,  # Number of workers for parallel loading
@@ -30,7 +30,7 @@ class GTSRBDataset:
                                            the dataset. Defaults to [].
             split (Literal["train","val","test"], optional): The dataset split.
                                                              Defaults to
-                                                             "train".
+                                                             None.
             transforms (Optional[Callable], optional): The transformations to
                                                        apply to the images.
                                                        Defaults to None.

@@ -1,74 +1,61 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from typing import List, Optional
+from typing import List, Optional, Set
 
 
 def plot_confusion_matrix(
     y_true: np.ndarray,
     y_pred: np.ndarray,
-    desired_classes: set,
-    class_names: Optional[List[str]] = None,
-    save_path: Optional[str] = None,
+    classes: Set[int],
+    save_path: Optional[str] = None
 ) -> None:
     """
     Plot the confusion matrix using matplotlib only.
     Args:
         y_true (np.ndarray): True labels.
         y_pred (np.ndarray): Predicted labels.
-        desired_classes (set): Set of desired class labels to include in the confusion matrix.
-        class_names (Optional[List[str]]): List of class names. If None, uses
-                                           integers.
+        classes (Set[int]): Set of class labels to include in the confusion matrix.
         save_path (Optional[str]): Path to save the plot. If None, the plot is
                                    shown.
     """
-    # Create a mapping from desired class to index
-    class_to_index = {cls: idx for idx, cls in enumerate(sorted(desired_classes))}
-    num_classes = len(desired_classes)
-
+    # Create a mapping from class to index
+    class_to_index = {cls: idx for idx, cls in enumerate(sorted(classes))}
+    num_classes = len(classes)
     # Initialize the confusion matrix
     cm = np.zeros((num_classes, num_classes), dtype=int)
-
     # Populate the confusion matrix
     for true, pred in zip(y_true, y_pred):
-        if true in desired_classes and pred in desired_classes:
+        if true in classes and pred in classes:
             true_idx = class_to_index[true]
             pred_idx = class_to_index[pred]
             cm[true_idx][pred_idx] += 1
-
     plt.figure(figsize=(8, 6))
     plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-    plt.title("Confusion Matrix")
+    plt.title("Confusion Matrix")  # Fixed title
     plt.colorbar()
-
-    if class_names is None:
-        class_names = [str(cls) for cls in sorted(desired_classes)]
-
-    plt.xticks(np.arange(num_classes), class_names, rotation=45)
-    plt.yticks(np.arange(num_classes), class_names)
-
+    # Use the sorted class values as labels
+    class_values = [str(cls) for cls in sorted(classes)]
+    plt.xticks(np.arange(num_classes), class_values, rotation=45)
+    plt.yticks(np.arange(num_classes), class_values)
     for i in range(num_classes):
         for j in range(num_classes):
             plt.text(j, i, str(cm[i, j]),
                      ha="center", va="center",
                      color="white" if cm[i, j] > cm.max() / 2 else "black")
-
     plt.ylabel("True")
     plt.xlabel("Predicted")
     plt.tight_layout()
-
     if save_path:
         plt.savefig(save_path)
     else:
         plt.show()
 
 
-
-
 def plot_curves(
     train_losses: List[float],
-    val_losses: Optional[List[float]],
     train_accs: List[float],
-    val_accs: Optional[List[float]],
+    val_losses: Optional[List[float]] = None,
+    val_accs: Optional[List[float]] = None,
     save_path: Optional[str] = None,
 ) -> None:
     """
@@ -83,7 +70,7 @@ def plot_curves(
                                    shown.
     """
     plt.figure(figsize=(12, 4))
-
+    num_epochs = len(train_losses)
     # Loss
     plt.subplot(1, 2, 1)
     plt.plot(train_losses, label="Train Loss")
@@ -91,9 +78,9 @@ def plot_curves(
         plt.plot(val_losses, label="Validation Loss")
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
+    plt.xticks(range(1, num_epochs + 1))  # Set x-axis ticks to integer epochs
     plt.legend()
     plt.title("Loss Curve")
-
     # Accuracy
     plt.subplot(1, 2, 2)
     plt.plot(train_accs, label="Train Accuracy")
@@ -101,11 +88,10 @@ def plot_curves(
         plt.plot(val_accs, label="Validation Accuracy")
     plt.xlabel("Epoch")
     plt.ylabel("Accuracy")
+    plt.xticks(range(1, num_epochs + 1))  # Set x-axis ticks to integer epochs
     plt.legend()
     plt.title("Accuracy Curve")
-
     plt.tight_layout()
-
     if save_path:
         plt.savefig(save_path)
     else:
@@ -164,18 +150,20 @@ def plot_saliency_map(
 ) -> None:
     """
     Plot a saliency map.
-
     Args:
         saliency_map (np.ndarray): The saliency map.
         save_path (Optional[str]): The path to save the plot. If None, the plot
                                    is shown.
     """
+    # Transpose the saliency map from (C, H, W) to (H, W, C)
+    saliency_map = saliency_map.transpose(1, 2, 0)
+    # Normalize the saliency map to the range [0, 1]
+    saliency_map = saliency_map / saliency_map.max()
     plt.figure(figsize=(8, 6))
     plt.imshow(saliency_map, cmap="hot")
     plt.colorbar()
     plt.title("Saliency Map")
     plt.tight_layout()
-
     if save_path:
         plt.savefig(save_path)
     else:
