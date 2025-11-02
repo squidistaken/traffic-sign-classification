@@ -99,7 +99,6 @@ class Linear(Layer):
     def grads(self):
         return {"dW": self.grad_weights, "db": self.grad_biases}
 
-
     def output_shape(self, input_shape: tuple) -> tuple:
         """
         Compute the output shape given the input shape.

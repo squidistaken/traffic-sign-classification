@@ -1,7 +1,6 @@
 import numpy as np
 from abc import ABC, abstractmethod
 from typing import Tuple, Dict, Any, List
-from .layers.base_layers import Layer
 
 
 # region Abstract Optimizer
@@ -68,8 +67,6 @@ class SGD(Optimizer):
                     grad = grad + weight_decay * param
 
                 param -= lr * grad
-
-
 # endregion
 
 
@@ -113,8 +110,6 @@ class Adam(Optimizer):
                 v_hat = v / (1 - beta2**t)
 
                 param -= lr * (m_hat / (np.sqrt(v_hat) + epsilon))
-
-
 # endregion
 
 
@@ -142,6 +137,4 @@ class Momentum(Optimizer):
                 v = self.state[(None, name)]["v"]
                 v[:] = momentum * v + grad
                 param -= lr * v
-
-
 # endregion

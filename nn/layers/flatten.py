@@ -42,7 +42,8 @@ class Flatten(Layer):
             np.ndarray: The downstream gradient.
         """
         # Ensure that forward has been called.
-        assert self.cache_shape is not None, "Must call forward before backward!"
+        assert self.cache_shape is not None, \
+            "Must call forward before backward!"
 
         B, C, H, W = self.cache_shape
         # Unflatten the gradient to the original input shape.
@@ -55,7 +56,6 @@ class Flatten(Layer):
 
     def grads(self):
         return {}
-
 
     def output_shape(self, input_shape: tuple) -> tuple:
         """
