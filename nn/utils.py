@@ -179,7 +179,6 @@ def export_encoded_labels(
     return output_csv
 
 
-
 def compute_accuracy(predictions: np.ndarray, labels: np.ndarray) -> float:
     """
     Compute the accuracy of predictions.

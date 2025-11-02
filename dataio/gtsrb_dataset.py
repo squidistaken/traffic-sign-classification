@@ -3,7 +3,7 @@ import numpy as np
 import os
 import csv
 from concurrent.futures import ThreadPoolExecutor
-from PIL import Image
+from PIL import Imagefrom PIL import Image
 
 class GTSRBDataset:
     """German Traffic Sign Recognition Benchmark Dataset Class."""
@@ -71,7 +71,7 @@ class GTSRBDataset:
         Returns:
             int: The length of the dataset.
         """
-        if self.indices:
+        if self.indices is not None and len(self.indices) > 0:
             return len(self.indices)
         return len(self.labels_data)
 
