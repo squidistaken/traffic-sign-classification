@@ -14,7 +14,7 @@ class Layer(ABC):
         Initialize layer parameters and gradients.
 
         Args:
-            name (str, optional): The name of the layer. Defaults to None.
+            name (str, optional): The name of the layer. Defaults to "Layer".
         """
         self.name = name
 
