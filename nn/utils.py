@@ -1,5 +1,7 @@
+import csv
+import os
 import numpy as np
-from typing import Tuple
+from typing import Tuple, Any, Set, List
 
 
 def image_to_column(
@@ -126,6 +128,56 @@ def one_hot_encode(labels: np.ndarray, num_classes: int) -> np.ndarray:
     one_hot[np.arange(labels.size), labels] = 1
 
     return one_hot
+
+
+def export_encoded_labels(
+    dataset: Any,
+    chosen_classes: Set[int],
+    clipped_indices: List[int],
+    output_name: str = "filtered_labels.csv",
+) -> str:
+    """
+    Export a filtered and encoded GTSRB labels file matching the original format:
+    Filename;Width;Height;Roi.X1;Roi.Y1;Roi.X2;Roi.Y2;ClassId
+
+    Args:
+        chosen_classes (Set[int]): The selected class labels (e.g., {1, 2, 10, 13, 38}).
+        clipped_indices (List[int]): The dataset indices to include.
+        output_name (str, optional): Name of the output CSV file. Defaults to 'filtered_labels.csv'.
+
+    Returns:
+        str: Path to the exported CSV file.
+    """
+    labels = dataset.labels_data
+    root = dataset.root
+    labels_path = os.path.join(root, dataset.labels)
+
+    # Load the original CSV to preserve all fields
+    with open(labels_path, "r") as f:
+        reader = csv.reader(f, delimiter=";")
+        header = next(reader)
+        full_rows = [row for row in reader]
+
+    # Map classes to new indices (0..N-1)
+    label_to_index = {label: index for index, label in enumerate(chosen_classes)}
+    mapped_labels = np.array([label_to_index[labels[i][1]] for i in clipped_indices])
+
+    # Build filtered rows with new encoded ClassId
+    filtered_rows = []
+    for idx, mapped_label in zip(clipped_indices, mapped_labels):
+        row = full_rows[idx]
+        row[-1] = str(mapped_label)  # Replace ClassId
+        filtered_rows.append(row)
+
+    # Write to new CSV with *exact same columns*
+    output_csv = os.path.join(root, output_name)
+    with open(output_csv, "w", newline="") as f:
+        writer = csv.writer(f, delimiter=";")
+        writer.writerow(header)
+        writer.writerows(filtered_rows)
+
+    return output_csv
+
 
 
 def compute_accuracy(predictions: np.ndarray, labels: np.ndarray) -> float:

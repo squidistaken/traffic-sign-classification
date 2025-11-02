@@ -3,7 +3,7 @@ import numpy as np
 import os
 import csv
 from concurrent.futures import ThreadPoolExecutor
-
+from PIL import Image
 
 class GTSRBDataset:
     """German Traffic Sign Recognition Benchmark Dataset Class."""
@@ -17,6 +17,7 @@ class GTSRBDataset:
         transforms: Optional[Callable] = None,
         cache: bool = False,  # Enable caching
         num_workers: int = 4,  # Number of workers for parallel loading
+        for_torch: bool = False,  # Flag to indicate if dataset is used with PyTorch
     ) -> None:
         """Initialise the GTSRB dataset.
         Args:
@@ -38,6 +39,8 @@ class GTSRBDataset:
                                     False.
             num_workers (int, optional): Number of workers for parallel loading.
                                          Defaults to 4.
+            for_torch (bool, optional): Whether the dataset is used for training
+                                        with PyTorch. Defaults to False.
         """
         self.root = root
         self.x_dir = x_dir
@@ -47,6 +50,7 @@ class GTSRBDataset:
         self.transforms = transforms
         self.cache = cache
         self.num_workers = num_workers
+        self.for_torch = for_torch
         self.labels_data = self._load_labels()
         self.executor = ThreadPoolExecutor(max_workers=num_workers)
         self.image_cache = {} if cache else None
@@ -67,7 +71,9 @@ class GTSRBDataset:
         Returns:
             int: The length of the dataset.
         """
-        return len(self.indices)
+        if self.indices:
+            return len(self.indices)
+        return len(self.labels_data)
 
     def load_ppm_image(self, filepath: str) -> np.ndarray:
         """Load a PPM P6 image from the given filepath.
@@ -118,7 +124,6 @@ class GTSRBDataset:
         actual_index = self.indices[index]
         filename, label = self.labels_data[actual_index]
         filepath = os.path.join(self.root, self.x_dir, filename)
-
         # Check cache first
         if self.cache and filepath in self.image_cache:
             image = self.image_cache[filepath]
@@ -127,6 +132,10 @@ class GTSRBDataset:
             if self.cache:
                 self.image_cache[filepath] = image
 
+        # Convert to PIL Image if for_torch is True
+        if self.for_torch:
+            image = Image.fromarray(image, mode='RGB')
+
         if self.transforms:
             image = self.transforms(image)
         return image, label
@@ -134,7 +143,6 @@ class GTSRBDataset:
     def __del__(self):
         """Clean up the executor when the dataset is deleted."""
         self.executor.shutdown(wait=False)
-
 
 def tests() -> None:
     """Run tests for GTSRBDataset class."""

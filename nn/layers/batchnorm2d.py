@@ -1,44 +1,43 @@
 from .base_layers import Layer2D
-from typing import Optional
+from typing import Optional, Callable
 import numpy as np
 
 
 class BatchNorm2D(Layer2D):
     """The BatchNorm2D Layer, which performs 2D batch normalization."""
-
     def __init__(
         self,
         num_channels: int,
         momentum: float = 0.9,
         epsilon: float = 1e-5,
         name: str = "BatchNorm2D",
+        weight_init: Optional[Callable] = None
     ) -> None:
         """Initialize the BatchNorm2D layer.
-
         Args:
             num_features (int): Number of features (channels) in the input.
             momentum (float, optional): The momentum for running mean and
                                         variance. Defaults to 0.9.
             epsilon (float, optional): The small constant to avoid division by
                                        zero. Defaults to 1e-5.
+            weight_init (Optional[Callable]): A function to initialize the weights.
         """
-        super().__init__(name)
+        super().__init__(name, weight_init)
         self.num_channels = num_channels
         self.momentum = momentum
         self.epsilon = epsilon
-
         # Initialize the scale and shift parameters.
-        self.gamma = np.ones(num_channels)
+        if weight_init is not None:
+            self.gamma = weight_init((num_channels,))
+        else:
+            self.gamma = np.ones(num_channels)
         self.beta = np.zeros(num_channels)
-
         # Initialize gradients.
         self.grad_gamma = np.zeros_like(self.gamma)
         self.grad_beta = np.zeros_like(self.beta)
-
         # Initialize the running mean and variance.
         self.running_mean = np.zeros(num_channels)
         self.running_var = np.ones(num_channels)
-
         # Cache the backward pass variables.
         self.cache: Optional[dict] = None
 

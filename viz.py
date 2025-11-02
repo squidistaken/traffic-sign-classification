@@ -97,33 +97,26 @@ def plot_curves(
     else:
         plt.show()
 
-
 def compute_saliency_map(model, input_sample, eps=1e-5, batch_size=1000):
     """
     Compute a saliency map for a single input sample using batched finite differences.
-
     Args:
         model: Model with a .forward() method.
         input_sample (np.ndarray): Single input, shape (C, H, W)
         eps (float): Small perturbation for finite differences
         batch_size (int): Number of pixels to process at a time
-
     Returns:
         np.ndarray: Saliency map, same shape as input_sample
     """
     input_sample = np.array(input_sample, dtype=float)
-
     # Forward pass for original input
     output = model.forward(input_sample[np.newaxis, ...]).reshape(-1)
     predicted_class = np.argmax(output)
-
     # Flatten input for pixel-wise perturbation
     flat_input = input_sample.flatten()
     D = flat_input.size
-
     # Initialize gradients array
     gradients = np.zeros(D)
-
     # Compute gradients in batches
     for start in range(0, D, batch_size):
         end = min(start + batch_size, D)
@@ -139,7 +132,6 @@ def compute_saliency_map(model, input_sample, eps=1e-5, batch_size=1000):
         outputs_perturbed = model.forward(perturbed_inputs)
         # Compute gradients for this batch
         gradients[start:end] = (outputs_perturbed[:, predicted_class] - output[predicted_class]) / eps
-
     # Reshape gradients to input shape
     saliency_map = np.abs(gradients).reshape(input_sample.shape)
     return saliency_map
@@ -161,8 +153,10 @@ def plot_saliency_map(
     saliency_map = saliency_map / saliency_map.max()
     plt.figure(figsize=(8, 6))
     plt.imshow(saliency_map, cmap="hot")
-    plt.colorbar()
+    plt.colorbar(label="Saliency Value")
     plt.title("Saliency Map")
+    plt.xlabel("Width")
+    plt.ylabel("Height")
     plt.tight_layout()
     if save_path:
         plt.savefig(save_path)

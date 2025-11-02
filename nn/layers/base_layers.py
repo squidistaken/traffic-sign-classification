@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Callable, Optional
 
 
 # region Layer
@@ -9,14 +9,15 @@ class Layer(ABC):
     Abstract Base Class for Layers. NP arrays are expected in NCHW format.
     """
 
-    def __init__(self, name: str = "Layer") -> None:
+    def __init__(self, name: str = "Layer", weight_init: Optional[Callable] = None) -> None:
         """
         Initialize layer parameters and gradients.
-
         Args:
             name (str, optional): The name of the layer. Defaults to "Layer".
+            weight_init (Optional[Callable]): A function to initialize the weights.
         """
         self.name = name
+        self.weight_init = weight_init
 
     @abstractmethod
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
@@ -79,6 +80,17 @@ class Layer(ABC):
         """
         pass
 
+    def initialize_weights(self, shape: Tuple) -> np.ndarray:
+        """
+        Initialize the weights using the provided initialization function.
+        Args:
+            shape (Tuple): The shape of the weights.
+        Returns:
+            np.ndarray: The initialized weights.
+        """
+        if self.weight_init is not None:
+            return self.weight_init(shape)
+
 
 # endregion
 
@@ -88,18 +100,18 @@ class Layer2D(Layer):
     """
     Abstract Base Class for 2D Layers. NP arrays are expected in NCHW format.
     """
-
     def __init__(
-        self, stride: int = 1, padding: int = 0, name: str = "Layer2D"
+        self, stride: int = 1, padding: int = 0, name: str = "Layer2D", weight_init: Optional[Callable] = None
     ) -> None:
         """
         Initialize the 2D layer.
-
         Args:
             stride (int, optional): The stride of the layer. Defaults to 1.
             padding (int, optional): The padding of the layer. Defaults to 0.
+            name (str, optional): The name of the layer. Defaults to "Layer2D".
+            weight_init (Optional[Callable]): A function to initialize the weights.
         """
-        super().__init__(name)
+        super().__init__(name, weight_init)
         self.stride = stride
         self.padding = padding
 
