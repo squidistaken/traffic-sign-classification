@@ -1,22 +1,26 @@
 import numpy as np
 import os
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 from logger import Logger
-from dataio.gtsrb_dataset import GTSRBDataset   
-from train import train
-from dataio.transforms import ToCompose, ToResize, ToRotate, ToNoise, ToTensor, ToNormalize
 from dataio.gtsrb_dataset import GTSRBDataset
-from dataio.dataloader import DataLoader
 from train import train
+from dataio.transforms import (
+    ToCompose,
+    ToResize,
+    ToRotate,
+    ToNoise,
+    ToTensor,
+    ToNormalize
+)
+from dataio.dataloader import DataLoader
 
 
 def k_fold_splits(
-        dataset: GTSRBDataset,
-        k: int = 5,
-        seed: int = 42
+    k: int = 5,
+    seed: int = 42
 ) -> List[Tuple[np.ndarray, np.ndarray]]:
     rng = np.random.default_rng(seed)
-    size = len(dataset)
+    size = 51840
     indices = np.arange(size)
     rng.shuffle(indices)
     splits = []
@@ -30,7 +34,7 @@ def k_fold_splits(
     for fold_size in fold_sizes:
         stop = start + fold_size
         val_idx = indices[start:stop]
-        train_idx = np.concatenate([indices[:start], indices[start + fold_size :]])
+        train_idx = np.concatenate([indices[:start], indices[start + fold_size:]])
         splits.append((train_idx, val_idx))
         start = stop
 
@@ -39,7 +43,6 @@ def k_fold_splits(
 
 def cross_validate(
     model: Any,
-    dataset: GTSRBDataset,
     loss_fn: Any,
     optimizer: Any,
     num_epochs: int = 10,
@@ -49,8 +52,9 @@ def cross_validate(
     log_dir: str = "logs",
     checkpoint_root: str = "checkpoints",
 ) -> List[Dict[str, float]]:
-    splits = k_fold_splits(dataset, k=k, seed=seed)
-    
+    splits = k_fold_splits(k=k, seed=seed)
+
+    # Define data transforms
     train_transforms = ToCompose([
         ToResize(size=64),
         ToRotate(angle=15),
@@ -65,7 +69,18 @@ def cross_validate(
         ToNormalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
     ])
 
+    results = []
+
     for fold, (train_idx, val_idx) in enumerate(splits):
+        # Directories
+        fold_ckpt_dir = os.path.join(checkpoint_root, f"fold_{fold}")
+        fold_log_dir = os.path.join(log_dir, f"fold_{fold}")
+
+        # Logger for this fold
+        logger = Logger(log_dir=fold_log_dir)
+        logger.log_debug(f"Starting fold {fold + 1}/{k}.")
+
+        # Prepare datasets
         train_dataset = GTSRBDataset(
             root="./data/gtsrb/",
             indices=train_idx.tolist(),
@@ -80,12 +95,13 @@ def cross_validate(
             transforms=val_transforms
         )
 
+        print(len(train_dataset), len(val_dataset))
+
+        # Data loaders
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
         val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
-        fold_ckpt_dir = os.path.join(checkpoint_root, f"fold_{fold}")
-        fold_log_dir = os.path.join(log_dir, f"fold_{fold}")
-
+        # Train
         train_losses, val_losses, train_accs, val_accs = train(
             model=model,
             train_loader=train_loader,
@@ -98,8 +114,9 @@ def cross_validate(
             log_dir=fold_log_dir,
         )
 
-        logger = Logger(log_dir=fold_log_dir)
         logger.log_debug(f"Finished training fold {fold + 1}/{k}")
+
+        # Metrics
         final_train_loss = train_losses[-1] if train_losses else None
         final_val_loss = val_losses[-1] if val_losses else None
         final_train_acc = train_accs[-1] if train_accs else None
@@ -113,8 +130,7 @@ def cross_validate(
             f"Val Acc: {final_val_acc:.4f}"
         )
 
-        if fold == 0:
-            results = []
+        # Append results
         results.append({
             "fold": fold + 1,
             "train_loss": final_train_loss,
@@ -123,11 +139,13 @@ def cross_validate(
             "val_acc": final_val_acc,
         })
 
+        # Compute running averages
         avg_train_acc = np.mean([r["train_acc"] for r in results])
         avg_val_acc = np.mean([r["val_acc"] for r in results])
         avg_train_loss = np.mean([r["train_loss"] for r in results])
         avg_val_loss = np.mean([r["val_loss"] for r in results])
 
+        # Summary logger
         summary_logger = Logger(log_dir=log_dir)
         summary_logger.log_debug("Cross-validation complete.")
         summary_logger.log_debug(
@@ -137,4 +155,4 @@ def cross_validate(
             f"Average Val Acc: {avg_val_acc:.4f}"
         )
 
-        return results
+    return results
