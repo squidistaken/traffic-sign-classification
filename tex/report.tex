@@ -294,7 +294,7 @@ At this stage we would like to report metrics like MSE, which is defined by
 \begin{equation}
   \text{MSE} = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2,
 \end{equation}
-confusion matrices, or saliency maps. We did generate these but due to the lack of learning they are not instructive and therefore we will not present them.
+confusion matrices, or saliency maps. We did generate these but due to the lack of learning they are not instructive and therefore we will not present them. Our learning curves are similarly uninformative, but we nevertheless include them in Appendix \ref{appendix:materials} for completeness (Figure \ref{fig:learning-curves}).
 
 \begin{itemize}
   \item Performance metrics (accuracy, MSE, etc.)
@@ -491,6 +491,12 @@ During writing, the autocomplete feature was used to speed up formulation of sen
   \caption{Visual representation of the original CNN architecture we replicated. The presence of a small ReLU marker indicates a ReLU activation after that layer.}
 \end{figure}
 
+\begin{figure}
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/learning-curves.png}
+  \caption{Loss and accuracy curves during 30 epochs of learning.}
+  \ref{learning-curves}
+\end{figure}
 
 
 \end{document}
