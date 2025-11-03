@@ -30,9 +30,9 @@
 \geometry{margin=2.5cm}
 
 % Title info
-\title{Semester Project Report \\ \large Neural Networks (AI)}
+\title{"Semester" Project Report \\ \large Neural Networks (AI)}
 \author{
-  Team Members: David van Wuijkhuijse (s5592968), \\Marcus Harald Olof Persson (s5343798), \\Richard Frank Harnisch (s5238366) \\
+  David van Wuijkhuijse (s5592968), \\Marcus Harald Olof Persson (s5343798), \\Richard Frank Harnisch (s5238366) \\
   University of Groningen
 }
 \date{\today}
@@ -43,7 +43,7 @@
 
 \begin{abstract}
   \noindent
-  We implemented a feed-forward convolutional neural network from the group up including loss, activations, optimizer, and LR scheduler. We trained and evaluated the model on the German Traffic Sign Recognition Benchmark (GTSRB) dataset with five out of the 43 classes. Our model achieved a test accuracy of xx\%.
+  We implement a feed-forward convolutional neural network from the group up including loss, activations, optimizer, and LR scheduler. We train and evaluat the model on the German Traffic Sign Recognition Benchmark (GTSRB) dataset with five out of the 43 classes. Our model achieved a test accuracy of xx\%.
 \end{abstract}
 
 \tableofcontents
@@ -151,9 +151,9 @@ The architecture of the CNN is modeled after the original 1998 CNN (\cite{LeCun-
 
 \begin{itemize}
   \item \textbf{Input Layer:} The input layer takes 32$\times$32 pixel images. In the original model, characters were centered in a 28$\times$28 field within a 32$\times$32 input. This helps capture the essential features of the characters in a standard size.
-  \item \textbf{Convolutional Layers (C1, C3, C5):} These layers extract features from the input image using convolutional operations with different kernel sizes and numbers of feature maps. The first convolutional layer (C1) might detect simple features like edges, while deeper layers (C3, C5) detect more complex features.
+  \item \textbf{Convolutional Layers (C1, C3, C5):} These layers extract features from the input image using convolutional operations with different kernel sizes and numbers of feature maps. The first convolutional layer (C1) detect simple features like edges, while deeper layers (C3, C5) detect more complex features.
   \item \textbf{Subsampling Layers (S2, S4):} These layers reduce the spatial resolution of the feature maps through subsampling, often called pooling. This reduces data dimensionality and makes the network invariant to small translations of the input image, which is important for recognizing handwritten digits that can vary slightly in position and scale.
-  \item \textbf{Fully Connected Layer (F6):} This layer is fully connected to the previous layer and has 84 units. It integrates the features extracted by the convolutional and subsampling layers to make a final classification. The choice of 84 units might be specific to the number of features needed to distinguish between different digit classes.
+  \item \textbf{Fully Connected Layer (F6):} This layer is fully connected to the previous layer and has 84 units. It integrates the features extracted by the convolutional and subsampling layers to make a final classification.
 \end{itemize}
 
 Other key components include:
@@ -163,7 +163,7 @@ Other key components include:
   \begin{equation}
     \text{MSE} = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2
   \end{equation}
-  where \( N \) is the number of samples, $y_i$ is the observed value, and $\hat{y}_i$ is the predicted value. MSE is a common choice for regression tasks and was likely chosen for its simplicity and effectiveness in minimizing the error between predicted and actual values.
+  where \( N \) is the number of samples, $y_i$ is the observed value, and $\hat{y}_i$ is the predicted value. MSE is a common choice for regression tasks and was chosen for its simplicity and effectiveness in minimizing the error between predicted and actual values.
 
   \item \textbf{Optimizer (Momentum-based SGD):} The optimizer used was a momentum-based Stochastic Gradient Descent (SGD) algorithm. The momentum term helps accelerate the gradient vectors in the right directions, leading to faster convergence. The update rule for momentum-based SGD is given by:
   \begin{equation}
@@ -189,7 +189,7 @@ Other key components include:
 In our modern CNN recreation:
 
 \begin{itemize}
-  \item \textbf{Input Layer:} The input layer takes images with 3 channels, which are first converted to grayscale and resized to 28$\times$28 pixels. The images are then normalized with a mean of 0.5 and a standard deviation of 0.5 for each channel. This is similar to the original model, which also focused on capturing essential features in a standardized size.
+  \item \textbf{Input Layer:} The input layer takes images with three channels, which are first converted to grayscale and resized to $28\ times 28$ pixels. The images are then normalized with a mean of $0.5$ and a standard deviation of $0.5$ for each channel. This is similar to the original model, which also focused on capturing essential features in a standardized size.
   \item \textbf{Convolutional Layers (C1, C2):} These layers extract features from the input image using convolutional operations with different kernel sizes and numbers of feature maps. The first convolutional layer (C1) takes input with 3 channels and produces 6 output channels using a kernel size of 5$\times$5 with a stride of 1 and no padding. The second convolutional layer (C2) takes input with 6 channels and produces 16 output channels using a kernel size of 5$\times$5 with a stride of 1 and no padding.
   \item \textbf{Max Pooling Layers (S1, S2):} These layers reduce the spatial resolution of the feature maps through subsampling, using a pool size of 2$\times$2 with a stride of 2. This is similar to the subsampling layers in the original model.
   \item \textbf{Flatten Layer:} This layer flattens the output from the previous layer.
