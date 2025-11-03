@@ -56,8 +56,8 @@ Briefly describe dataset(s) and objectives.
 Keep it short, direct, and specific to your project.
 
 \section{Data}
-The German Traffic Sign Recognition Benchmark (GTSRB) dataset consists of 51,839 images of traffic signs on german roads, categorized into 43 different classes. The images are taken from dashcam footage of cars driving on the road and thus past the signs. This means that each sign is captured multiple times as the car passes the sign. This lessens the need for data augmentation as each sign is already represented multiple times. Signs are captured in a range of different lighting and weather conditions, as well as from different angles and distances.
-\begin{figure}
+The German Traffic Sign Recognition Benchmark (GTSRB) dataset consists of 51,839 images of traffic signs on German roads, categorized into 43 different classes. The images are taken from dashcam footage of cars driving on the road and thus past the signs. This means that each sign is captured multiple times as the car passes the sign. This lessens the need for data augmentation as each sign is already represented multiple times. Signs are captured in a range of different lighting and weather conditions, as well as from different angles and distances.
+\begin{figure}[h]
   \centering
   \includegraphics[width=0.3\textwidth]{images/00000_00000_00000.png}
   \includegraphics[width=0.3\textwidth]{images/00000_00000_00015.png}
@@ -65,12 +65,12 @@ The German Traffic Sign Recognition Benchmark (GTSRB) dataset consists of 51,839
   \caption{The same sign from different distances (and thus sizes) and slightly different angles.}
   \label{fig:augmentation}
 \end{figure}
-\begin{figure}
+\begin{figure}[h]
   \centering
   \includegraphics[width=0.3\textwidth]{images/00001_00001_00005.png}
   \includegraphics[width=0.3\textwidth]{images/00001_00006_00014.png}
   \includegraphics[width=0.3\textwidth]{images/00001_00012_00014.png}
-  \caption{Three different signs of the same type exhibiting variation in lighting conditions and angles.}
+  \caption{Three different signs of the same type exhibiting variation in lighting conditions and angles. For more examples of different types of variation, see Figure \ref{fig:random-samples} in Appendix \ref{appendix:materials}.}
   \label{fig:variation}
 \end{figure}
 
@@ -133,8 +133,6 @@ We implement a GTSRB dataset class in \texttt{dataio/gtsrb\_dataset.py}. This cl
 
 \section{Methods and Experiments}
 \subsection{Pipeline Overview}
-Diagram or list of your full pipeline: preprocessing, model, optimization.
-
 To begin, we preprocess the data. For this purpose, we have developed a suite of modular transform classes implemented in \texttt{transforms.py}. Each class implements a \texttt{\_\_call\_\_} method, allowing instances of these classes to be used as callable functions that apply specific transformations to input images. This design enables easy composition of multiple transformations into a single pipeline using the \texttt{ToCompose} class, which sequentially applies a list of transform instances to an image. On top of this, the following classes are implemented:
 \begin{itemize}
   \item \texttt{ToResize}: Resizes images to a specified square size using bicubic interpolation. This is so the images can be fed into the model which requires a fixed input size.
@@ -186,6 +184,13 @@ During writing, the autocomplete feature was used to speed up formulation of sen
 
 \section{Additional Materials}
 \label{appendix:materials}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/random_samples.png}
+  \caption{25 random samples from the dataset.}
+  \label{fig:random-samples}
+\end{figure}
 
 \begin{figure}[ht]
   \centering
