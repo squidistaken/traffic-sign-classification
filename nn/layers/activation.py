@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Callable, Dict, Tuple
 import numpy as np
 from .base_layers import Layer
 from ..activations import backward_pass
@@ -12,7 +12,7 @@ class Activation(Layer):
     """
 
     def __init__(
-        self, activation_fn: callable, name: str = "ActivationLayer", **kwargs
+        self, activation_fn: Callable, name: str = "ActivationLayer", **kwargs
     ):
         """Initialise the ActivationLayer.
 
