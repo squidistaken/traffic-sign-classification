@@ -2,8 +2,7 @@ import numpy as np
 
 
 def check_data_shape(data: np.ndarray, expected_shape: tuple) -> bool:
-    """
-    Check if the data has the expected shape.
+    """Check if the data has the expected shape.
 
     Args:
         data (np.ndarray): The input data.
@@ -55,12 +54,11 @@ def check_model_convergence(
                                stable. Defaults to 1e-4.
 
     Returns:
-        bool: The flag indicating if the loss has stablised within the
+        bool: The flag indicating if the loss has stabilised within the
               tolerance for the specified patience.
     """
     if len(loss_values) < patience:
         return False
-
     recent_losses = loss_values[-patience:]
 
     return all(abs(loss - recent_losses[0]) < tol for loss in recent_losses)

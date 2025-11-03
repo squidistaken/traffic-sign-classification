@@ -2,11 +2,15 @@ import numpy as np
 from typing import Optional, Callable
 from .base_layers import Layer
 
+
 class Linear(Layer):
-    """
-    The Linear (Fully Connected) Layer, which performs an affine
+    """The Linear (Fully Connected) Layer, which performs an affine
     transformation on the input data.
+
+    This class implements a fully connected layer, which applies a linear
+    transformation to the input data followed by an optional bias.
     """
+
     def __init__(
         self,
         in_features: int,
@@ -14,47 +18,50 @@ class Linear(Layer):
         W: Optional[np.ndarray] = None,
         b: Optional[np.ndarray] = None,
         name: str = "Linear",
-        weight_init: Optional[Callable] = None
+        weight_init: Optional[Callable] = None,
     ) -> None:
-        """
-        Initialize the Linear layer. If the weight matrix W or bias b
-        are not provided, they are initialized randomly.
+        """Initialise the Linear layer. If the weight matrix W or bias b are
+        not provided, they are initialised randomly.
+
         Args:
             in_features (int): The number of input features.
             out_features (int): The number of output features.
-            W (Optional[np.ndarray], optional): The weight matrix.
-                                                Defaults to None.
-            b (Optional[np.ndarray], optional): The bias vector.
-                                                Defaults to None.
-            weight_init (Optional[Callable]): A function to initialize the weights.
+            W (Optional[np.ndarray], optional): The weight matrix. Defaults to
+                                               None.
+            b (Optional[np.ndarray], optional): The bias vector. Defaults to
+                                                None.
+            weight_init (Optional[Callable]): A function to initialise the
+                                              weights.
         """
         super().__init__(name, weight_init)
+
         if W is None:
             if weight_init is not None:
                 self.W = weight_init((in_features, out_features))
             else:
-                # The initialization uses He initialization for weights. This is
-                # particularly effective when using ReLU activations.
+                # The initialisation uses He initialization for weights. This
+                # is particularly effective when using ReLU activations.
                 self.W = np.random.randn(in_features, out_features) * np.sqrt(
                     2 / in_features
                 )
         else:
             self.W = W
+
         if b is None:
             self.b = np.zeros(out_features)
         else:
             self.b = b
-        # Store these just to be sure
+
         self.in_features = in_features
         self.out_features = out_features
         self.grad_weights = np.zeros_like(self.W)
         self.grad_biases = np.zeros_like(self.b)
+
         # Store input for backward pass.
         self.cache_x: Optional[np.ndarray] = None
 
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
-        """
-        Perform the forward pass of the Linear layer.
+        """Perform the forward pass of the Linear layer.
 
         Args:
             x (np.ndarray): The input to the layer.
@@ -67,11 +74,11 @@ class Linear(Layer):
         # Cache the input for use in the backward pass.
         self.cache_x = x
         y = x.dot(self.W) + self.b
+
         return y
 
     def backward(self, dout: np.ndarray) -> np.ndarray:
-        """
-        Perform the backward pass of the Linear layer.
+        """Perform the backward pass of the Linear layer.
 
         Args:
             dout (np.ndarray): The upstream gradient.
@@ -81,7 +88,6 @@ class Linear(Layer):
         """
         # Ensure that forward has been called.
         assert self.cache_x is not None, "Must call forward before backward!"
-
         x = self.cache_x
 
         # The batch is averaged over in gradient calculations.
@@ -91,15 +97,24 @@ class Linear(Layer):
 
         return dx
 
-    def params(self):
+    def params(self) -> dict:
+        """Return the learnable parameters of the layer.
+
+        Returns:
+            dict: A dictionary mapping parameter names to their values.
+        """
         return {"W": self.W, "b": self.b}
 
-    def grads(self):
+    def grads(self) -> dict:
+        """Return the gradients of the learnable parameters.
+
+        Returns:
+            dict: A dictionary mapping parameter names to their gradients.
+        """
         return {"dW": self.grad_weights, "db": self.grad_biases}
 
     def output_shape(self, input_shape: tuple) -> tuple:
-        """
-        Compute the output shape given the input shape.
+        """Compute the output shape given the input shape.
 
         Args:
             input_shape (tuple): The shape of the input.

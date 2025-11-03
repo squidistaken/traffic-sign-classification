@@ -4,18 +4,26 @@ from typing import Optional
 
 
 class GlobalAvgPool2D(Layer2D):
-    """The GlobalAvgPool2D Layer, which performs global average pooling."""
+    """The GlobalAvgPool2D Layer, which performs global average pooling.
+
+    This class performs global average pooling, which averages each channel
+    over the spatial dimensions (height and width).
+    """
 
     def __init__(self, name: str = "GlobalAvgPool2D") -> None:
-        """Initialize the GlobalAvgPool2D layer."""
+        """Initialize the GlobalAvgPool2D layer.
+
+        Args:
+            name (str, optional): The name of the layer. Defaults to
+                                  "GlobalAvgPool2D".
+        """
         super().__init__(name, stride=1, padding=0)
 
         # Cache for backward pass.
         self.cache: Optional[dict] = None
 
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
-        """
-        Perform the forward pass of the layer.
+        """Perform the forward pass of the layer.
 
         Args:
             x (np.ndarray): The input to the layer.
@@ -37,8 +45,7 @@ class GlobalAvgPool2D(Layer2D):
         return out
 
     def backward(self, dout: np.ndarray) -> np.ndarray:
-        """
-        Perform the backward pass of the layer.
+        """Perform the backward pass of the layer.
 
         Args:
             dout (np.ndarray): The upstream gradient.
@@ -50,14 +57,29 @@ class GlobalAvgPool2D(Layer2D):
         N, C, H, W = input_shape
 
         # Compute the gradient with respect to the input.
-        dx = np.repeat(dout.repeat(N, C, 1, 1), H * W, axis=2)
+        dx = np.repeat(dout[:, :, np.newaxis, np.newaxis], H * W, axis=2)
         dx = dx.reshape(N, C, H, W) / (H * W)
 
         return dx
 
-    def output_shape(self, input_shape):
+    def params(self) -> dict:
+        """Return the learnable parameters of the layer.
+
+        Returns:
+            dict: A dictionary mapping parameter names to their values.
         """
-        Compute the output shape given the input shape.
+        return {}
+
+    def grads(self) -> dict:
+        """Return the gradients of the learnable parameters.
+
+        Returns:
+            dict: A dictionary mapping parameter names to their gradients.
+        """
+        return {}
+
+    def output_shape(self, input_shape: tuple) -> tuple:
+        """Compute the output shape given the input shape.
 
         Args:
             input_shape (Tuple[int, int, int, int]): The shape of the input.
@@ -66,11 +88,4 @@ class GlobalAvgPool2D(Layer2D):
             Tuple[int, int, int, int]: The shape of the output.
         """
         N, C, H, W = input_shape
-
         return (N, C, 1, 1)
-
-    def params(self):
-        return {}
-
-    def grads(self):
-        return {}

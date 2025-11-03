@@ -6,14 +6,14 @@ from typing import Tuple, Union
 def relu(
     x: Union[float, np.ndarray], alpha: float = 0.0
 ) -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]:
-    """
-    Compute the forward pass and gradient of the Rectified Linear Unit (ReLU)
-    activation function. If alpha is non-zero, it behaves like a Leaky ReLU.
+    """Compute the forward pass and gradient of the Rectified Linear Unit
+    (ReLU) activation function. If alpha is non-zero, it behaves like a Leaky
+    ReLU.
 
     Args:
         x (Union[float, np.ndarray]): The input value or array.
-        alpha (float): The slope for the negative part of the function.
-                       Defaults to 0.0
+        alpha (float, optional): The slope for the negative part of the
+                                 function. Defaults to 0.0.
 
     Returns:
         Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]: The tuple
@@ -40,8 +40,7 @@ def relu(
 def tanh(
     x: Union[float, np.ndarray],
 ) -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]:
-    """
-    Compute the forward pass and gradient of the Tanh activation function.
+    """Compute the forward pass and gradient of the Tanh activation function.
 
     Args:
         x (Union[float, np.ndarray]): The input value or array.
@@ -57,15 +56,14 @@ def tanh(
     """
     output = np.tanh(x)
     grad = 1 - output**2
-
     return output, grad
 
 
 def sigmoid(
     x: Union[float, np.ndarray],
 ) -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]:
-    """
-    Compute the forward pass and gradient of the Sigmoid activation function.
+    """Compute the forward pass and gradient of the Sigmoid activation
+    function.
 
     Args:
         x (Union[float, np.ndarray]): The input value or array.
@@ -82,31 +80,36 @@ def sigmoid(
     """
     output = 1 / (1 + np.exp(-x))
     grad = output * (1 - output)
-
     return output, grad
 
 
-def softmax(x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Compute the forward pass and gradient of the Softmax activation function.
+def softmax(x: Union[float, np.ndarray]
+            ) -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]:
+    """Compute the forward pass and gradient of the Softmax activation
+    function.
 
     Args:
         x (np.ndarray): The input array.
 
     Returns:
-        Tuple[np.ndarray, np.ndarray]: The tuple containing the output of the
-                                       Softmax function and its gradient at x.
+        Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]: The tuple
+                                                                   containing
+                                                                   the output
+                                                                   of the
+                                                                   Softmax
+                                                                   function and
+                                                                   its gradient
+                                                                   at x.
     """
     # Ensure numerical stability by subtracting max from input.
     exp_x = np.exp(x - np.max(x))
     sum_exp = np.sum(exp_x)
     output = exp_x / sum_exp
-    # This is a simplification; the actual gradient is a Jacobian.
+
+    # This is a simplification as the actual gradient is a Jacobian.
     grad = output * (1 - output)
 
     return output, grad
-
-
 # endregion
 
 
@@ -114,8 +117,7 @@ def softmax(x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
 def backward_pass(
     dout: Union[float, np.ndarray], grad: Union[float, np.ndarray]
 ) -> Union[float, np.ndarray]:
-    """
-    Compute the backward pass for any given activation function.
+    """Compute the backward pass for any given activation function.
 
     Args:
         dout (Union[float, np.ndarray]): The gradient of the loss with respect
@@ -128,6 +130,4 @@ def backward_pass(
                                   input.
     """
     return dout * grad
-
-
 # endregion

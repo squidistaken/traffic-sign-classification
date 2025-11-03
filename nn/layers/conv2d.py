@@ -5,7 +5,12 @@ from ..utils import image_to_column, column_to_image
 
 
 class Conv2D(Layer2D):
-    """The Conv2D Layer, which performs a 2D convolution operation."""
+    """The Conv2D Layer, which performs a 2D convolution operation.
+
+    This class implements a 2D convolution operation, which applies a set of
+    filters to the input to extract features.
+    """
+
     def __init__(
         self,
         in_channels: int,
@@ -14,9 +19,10 @@ class Conv2D(Layer2D):
         stride: int = 1,
         padding: int = 0,
         name: str = "Conv2D",
-        weight_init: Optional[Callable] = None
+        weight_init: Optional[Callable] = None,
     ) -> None:
-        """Initialize Conv2D layer.
+        """Initialise Conv2D layer.
+
         Args:
             in_channels (int): Number of input channels.
             out_channels (int): Number of output channels.
@@ -25,27 +31,39 @@ class Conv2D(Layer2D):
             stride (int, optional): Stride of the convolution. Defaults to 1.
             padding (int, optional): Zero-padding added to both sides of the
                                      input. Defaults to 0.
-            weight_init (Optional[Callable]): A function to initialize the weights.
+            name (str, optional): The name of the layer. Defaults to "Conv2D".
+            weight_init (Optional[Callable]): A function to initialise the
+                                              weights.
         """
         super().__init__(stride, padding, name, weight_init)
+
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size
-        # Initialize the weights and biases.
+
+        # Initialise the weights and biases.
         if weight_init is not None:
-            self.weights = weight_init((out_channels, in_channels, kernel_size, kernel_size))
+            self.weights = weight_init(
+                (out_channels, in_channels, kernel_size, kernel_size)
+            )
         else:
-            self.weights = np.random.randn(out_channels, in_channels, kernel_size, kernel_size) * 0.01
+            self.weights = (
+                np.random.randn(out_channels, in_channels, kernel_size,
+                                kernel_size)
+                * 0.01
+            )
+
         self.biases = np.zeros(out_channels)
-        # Gradients
+
+        # Gradients.
         self.grad_weights = np.zeros_like(self.weights)
         self.grad_biases = np.zeros_like(self.biases)
-        # Cache for backward pass
+
+        # Cache for backward pass.
         self.cache: Optional[dict] = None
 
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
-        """
-        Perform the forward pass of the layer.
+        """Perform the forward pass of the layer.
 
         Args:
             x (np.ndarray): The input to the layer.
@@ -67,8 +85,8 @@ class Conv2D(Layer2D):
 
         # Reshape the weights to rows.
         weights_matrix = self.weights.reshape(F, -1)
-
         # Perform the matrix multiplication.
+
         out = weights_matrix @ cols + self.biases.reshape(-1, 1)
 
         # Reshape the output.
@@ -80,8 +98,7 @@ class Conv2D(Layer2D):
         return out
 
     def backward(self, dout: np.ndarray) -> np.ndarray:
-        """
-        Perform the backward pass of the layer.
+        """Perform the backward pass of the layer.
 
         Args:
             dout (np.ndarray): The upstream gradient.
@@ -110,15 +127,24 @@ class Conv2D(Layer2D):
 
         return dx
 
-    def params(self):
+    def params(self) -> dict:
+        """Return the learnable parameters of the layer.
+
+        Returns:
+            dict: A dictionary mapping parameter names to their values.
+        """
         return {"W": self.weights, "b": self.biases}
 
-    def grads(self):
+    def grads(self) -> dict:
+        """Return the gradients of the learnable parameters.
+
+        Returns:
+            dict: A dictionary mapping parameter names to their gradients.
+        """
         return {"dW": self.grad_weights, "db": self.grad_biases}
 
     def output_shape(self, input_shape: tuple) -> tuple:
-        """
-        Compute the output shape given the input shape.
+        """Compute the output shape given the input shape.
 
         Args:
             input_shape (tuple): The shape of the input.
@@ -127,7 +153,8 @@ class Conv2D(Layer2D):
             tuple: The shape of the output.
         """
         batch_size, channels, height, width = input_shape
-        out_height = 1 + (height + 2 * self.padding - self.kernel_size) // self.stride
-        out_width = 1 + (width + 2 * self.padding - self.kernel_size) // self.stride
-
+        out_height = (1 + (height + 2 * self.padding - self.kernel_size)
+                      // self.stride)
+        out_width = (1 + (width + 2 * self.padding - self.kernel_size)
+                     // self.stride)
         return (batch_size, self.out_channels, out_height, out_width)

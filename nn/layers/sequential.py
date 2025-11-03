@@ -3,21 +3,25 @@ import numpy as np
 
 
 class Sequential(Layer):
-    """The Sequential Layer, which chains multiple layers together."""
+    """The Sequential Layer, which chains multiple layers together.
 
+    This class allows the sequential composition of multiple layers, where the
+    output of one layer is the input to the next.
+    """
     def __init__(self, layers: list[Layer], name: str = "Sequential"):
-        """Initialize Sequential layer.
+        """Initialise Sequential layer.
 
         Args:
             layers (list[Layer]): The list of layers to chain.
+            name (str, optional): The name of the layer. Defaults to
+                                  "Sequential".
         """
         super().__init__(name)
 
         self.layers = layers
 
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
-        """
-        Perform the forward pass of the layer.
+        """Perform the forward pass of the layer.
 
         Args:
             x (np.ndarray): The input to the layer.
@@ -33,8 +37,7 @@ class Sequential(Layer):
         return x
 
     def backward(self, dout: np.ndarray) -> np.ndarray:
-        """
-        Perform the backward pass of the layer.
+        """Perform the backward pass of the layer.
 
         Args:
             dout (np.ndarray): The upstream gradient.
@@ -47,24 +50,36 @@ class Sequential(Layer):
 
         return dout
 
-    def params(self):
+    def params(self) -> dict:
+        """Return the learnable parameters of the layer.
+
+        Returns:
+            dict: A dictionary mapping parameter names to their values.
+        """
         params = {}
+
         for i, layer in enumerate(self.layers):
             for name, value in layer.params().items():
                 params[f"layer{i}_{name}"] = value
+
         return params
 
-    def grads(self):
+    def grads(self) -> dict:
+        """Return the gradients of the learnable parameters.
+
+        Returns:
+            dict: A dictionary mapping parameter names to their gradients.
+        """
         grads = {}
+
         for i, layer in enumerate(self.layers):
             for name, value in layer.grads().items():
                 grads[f"layer{i}_{name}"] = value
+
         return grads
 
-
     def output_shape(self, input_shape: tuple) -> tuple:
-        """
-        Compute the output shape given the input shape.
+        """Compute the output shape given the input shape.
 
         Args:
             input_shape (tuple): The shape of the input.

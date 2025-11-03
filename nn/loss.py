@@ -1,8 +1,9 @@
 import numpy as np
-from typing import List, Tuple
+from typing import Tuple
 
 
-def cross_entropy(logits: np.ndarray, targets: np.ndarray) -> Tuple[float, np.ndarray]:
+def cross_entropy(logits: np.ndarray, targets: np.ndarray
+                  ) -> Tuple[float, np.ndarray]:
     """Perform a cross-entropy loss calculation for a batch of logits and
     target labels.
 
@@ -30,8 +31,7 @@ def cross_entropy(logits: np.ndarray, targets: np.ndarray) -> Tuple[float, np.nd
 def class_balanced_cross_entropy(
     logits: np.ndarray, targets: np.ndarray, class_counts: np.ndarray
 ) -> Tuple[float, np.ndarray]:
-    """
-    Compute class-balanced cross-entropy loss and its gradient.
+    """Compute class-balanced cross-entropy loss and its gradient.
 
     Args:
         logits (np.ndarray): The predicted logits.
@@ -40,24 +40,23 @@ def class_balanced_cross_entropy(
 
     Returns:
         Tuple[float, np.ndarray]: The computed loss and the gradient with
-                                    respect to the logits.
+                                  respect to the logits.
     """
     z = logits - logits.max(axis=1, keepdims=True)
     exp_z = np.exp(z)
     softmax = exp_z / exp_z.sum(axis=1, keepdims=True)
     n = logits.shape[0]
-    num_classes = class_counts.shape[0]
 
-    # Compute class frequencies
+    # Compute class frequencies.
     class_weights = 1.0 / class_counts
-    class_weights /= class_weights.sum()  # Normalize weights
+    class_weights /= class_weights.sum()
 
-    # Compute loss
+    # Compute loss.
     sample_weights = class_weights[targets]
     log_probs = -np.log(softmax[np.arange(n), targets])
     loss = (sample_weights * log_probs).sum() / sample_weights.sum()
 
-    # Compute gradient
+    # Compute gradient.
     grad = softmax
     grad[np.arange(n), targets] -= 1
     grad *= sample_weights[:, np.newaxis]
@@ -67,16 +66,25 @@ def class_balanced_cross_entropy(
 
 
 def mse(logits: np.ndarray, targets: np.ndarray) -> Tuple[float, np.ndarray]:
+    """Compute the mean squared error loss and its gradient.
+
+    Args:
+        logits (np.ndarray): The predicted logits.
+        targets (np.ndarray): The true target labels.
+
+    Returns:
+        Tuple[float, np.ndarray]: The computed loss and the gradient with
+                                  respect to the logits.
+    """
     batch_size, _ = logits.shape
 
-    # Convert integer labels to one-hot
+    # Convert integer labels to one-hot.
     one_hot = np.zeros_like(logits)
     one_hot[np.arange(batch_size), targets] = 1.0
 
-    # Compute MSE loss
+    # Compute MSE loss.
     loss = np.mean((logits - one_hot) ** 2)
+    # Compute gradient.
 
-    # Compute gradient
     grad_output = 2 * (logits - one_hot) / batch_size
-
     return loss, grad_output

@@ -4,46 +4,62 @@ import numpy as np
 
 
 class BatchNorm2D(Layer2D):
-    """The BatchNorm2D Layer, which performs 2D batch normalization."""
+    """The BatchNorm2D Layer, which performs 2D batch normalization.
+
+    This class implements batch normalization for 2D inputs, which normalises
+    the activations of the previous layer at each batch. It helps in
+    stabilising the learning process and reducing the number of training
+    epochs.
+    """
+
     def __init__(
         self,
         num_channels: int,
         momentum: float = 0.9,
         epsilon: float = 1e-5,
         name: str = "BatchNorm2D",
-        weight_init: Optional[Callable] = None
+        weight_init: Optional[Callable] = None,
     ) -> None:
-        """Initialize the BatchNorm2D layer.
+        """Initialise the BatchNorm2D layer.
+
         Args:
-            num_features (int): Number of features (channels) in the input.
+            num_channels (int): Number of channels in the input.
             momentum (float, optional): The momentum for running mean and
                                         variance. Defaults to 0.9.
             epsilon (float, optional): The small constant to avoid division by
                                        zero. Defaults to 1e-5.
-            weight_init (Optional[Callable]): A function to initialize the weights.
+            name (str, optional): The name of the layer. Defaults to
+                                  "BatchNorm2D".
+            weight_init (Optional[Callable]): A function to initialise the
+                                              weights.
         """
         super().__init__(name, weight_init)
+
         self.num_channels = num_channels
         self.momentum = momentum
         self.epsilon = epsilon
-        # Initialize the scale and shift parameters.
+
+        # Initialise the scale and shift parameters.
         if weight_init is not None:
             self.gamma = weight_init((num_channels,))
         else:
             self.gamma = np.ones(num_channels)
+
         self.beta = np.zeros(num_channels)
-        # Initialize gradients.
+
+        # Initialise gradients.
         self.grad_gamma = np.zeros_like(self.gamma)
         self.grad_beta = np.zeros_like(self.beta)
-        # Initialize the running mean and variance.
+
+        # Initialise the running mean and variance.
         self.running_mean = np.zeros(num_channels)
         self.running_var = np.ones(num_channels)
+
         # Cache the backward pass variables.
         self.cache: Optional[dict] = None
 
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
-        """
-        Perform the forward pass of the layer.
+        """Perform the forward pass of the layer.
 
         Args:
             x (np.ndarray): The input to the layer.
@@ -77,7 +93,8 @@ class BatchNorm2D(Layer2D):
         )
 
         # Scale and shift the normalized input.
-        out = self.gamma.reshape(1, C, 1, 1) * x_norm + self.beta.reshape(1, C, 1, 1)
+        out = (self.gamma.reshape(1, C, 1, 1) * x_norm
+               + self.beta.reshape(1, C, 1, 1))
 
         # Cache variables for backward pass.
         self.cache = {"x": x, "x_norm": x_norm, "mean": mean, "var": var}
@@ -85,10 +102,11 @@ class BatchNorm2D(Layer2D):
         return out
 
     def backward(self, dout: np.ndarray) -> np.ndarray:
-        """
-        Perform the backward pass of the layer.
+        """Perform the backward pass of the layer.
+
         Args:
             dout (np.ndarray): The upstream gradient.
+
         Returns:
             np.ndarray: The downstream gradient.
         """
@@ -97,6 +115,7 @@ class BatchNorm2D(Layer2D):
         mean = self.cache["mean"]
         var = self.cache["var"]
         N, C, _, _ = x.shape
+
         # Compute gradients.
         self.grad_gamma = np.sum(dout * x_norm, axis=(0, 2, 3))
         self.grad_beta = np.sum(dout, axis=(0, 2, 3))
@@ -117,14 +136,24 @@ class BatchNorm2D(Layer2D):
             + dvar.reshape(1, C, 1, 1) * 2 * (x - mean.reshape(1, C, 1, 1)) / N
             + dmean.reshape(1, C, 1, 1) / N
         )
+
         return dx
 
-    def params(self):
+    def params(self) -> dict:
+        """Return the learnable parameters of the layer.
+
+        Returns:
+            dict: A dictionary mapping parameter names to their values.
+        """
         return {"gamma": self.gamma, "beta": self.beta}
 
-    def grads(self):
-        return {"dgamma": self.grad_gamma, "dbeta": self.grad_beta}
+    def grads(self) -> dict:
+        """Return the gradients of the learnable parameters.
 
+        Returns:
+            dict: A dictionary mapping parameter names to their gradients.
+        """
+        return {"dgamma": self.grad_gamma, "dbeta": self.grad_beta}
 
     def output_shape(
         self, input_shape: tuple[int, int, int, int]

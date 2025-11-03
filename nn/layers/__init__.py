@@ -22,5 +22,5 @@ __all__ = [
     "Linear",
     "MaxPool2D",
     "Sequential",
-    "Activation"
+    "Activation",
 ]

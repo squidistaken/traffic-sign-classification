@@ -5,24 +5,28 @@ from typing import Tuple, Dict, Callable, Optional
 
 # region Layer
 class Layer(ABC):
-    """
-    Abstract Base Class for Layers. NP arrays are expected in NCHW format.
+    """Abstract Base Class for Layers. NP arrays are expected in NCHW format.
+
+    This class serves as the base class for all layers in a neural network. It
+    defines the interface that all layers must implement.
     """
 
-    def __init__(self, name: str = "Layer", weight_init: Optional[Callable] = None) -> None:
-        """
-        Initialize layer parameters and gradients.
+    def __init__(
+        self, name: str = "Layer", weight_init: Optional[Callable] = None
+    ) -> None:
+        """Initialise layer parameters and gradients.
+
         Args:
             name (str, optional): The name of the layer. Defaults to "Layer".
-            weight_init (Optional[Callable]): A function to initialize the weights.
+            weight_init (Optional[Callable]): A function to initialise the
+                                              weights.
         """
         self.name = name
         self.weight_init = weight_init
 
     @abstractmethod
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
-        """
-        Perform the forward pass of the layer.
+        """Perform the forward pass of the layer.
 
         Args:
             x (np.ndarray): The input to the layer.
@@ -36,8 +40,7 @@ class Layer(ABC):
 
     @abstractmethod
     def backward(self, dout: np.ndarray) -> np.ndarray:
-        """
-        Perform the backward pass of the layer.
+        """Perform the backward pass of the layer.
 
         Args:
             dout (np.ndarray): The upstream gradient.
@@ -49,28 +52,27 @@ class Layer(ABC):
 
     @abstractmethod
     def params(self) -> Dict[str, np.ndarray]:
-        """
-        Return the learnable parameters of the layer.
+        """Return the learnable parameters of the layer.
 
         Returns:
-            Dict[str, np.ndarray]: A dictionary mapping parameter names to their values.
+            Dict[str, np.ndarray]: A dictionary mapping parameter names to
+                                   their values.
         """
         pass
 
     @abstractmethod
     def grads(self) -> Dict[str, np.ndarray]:
-        """
-        Return the gradients of the learnable parameters.
+        """Return the gradients of the learnable parameters.
 
         Returns:
-            Dict[str, np.ndarray]: A dictionary mapping parameter names to their gradients.
+            Dict[str, np.ndarray]: A dictionary mapping parameter names to
+                                   their gradients.
         """
         pass
 
     @abstractmethod
     def output_shape(self, input_shape: Tuple) -> Tuple:
-        """
-        Compute the output shape given the input shape.
+        """Compute the output shape given the input shape.
 
         Args:
             input_shape (Tuple): The shape of the input.
@@ -80,36 +82,46 @@ class Layer(ABC):
         """
         pass
 
-    def initialize_weights(self, shape: Tuple) -> np.ndarray:
-        """
-        Initialize the weights using the provided initialization function.
+    def Initialise_weights(self, shape: Tuple) -> np.ndarray:
+        """Initialise the weights using the provided initialization function.
+
         Args:
             shape (Tuple): The shape of the weights.
+
         Returns:
-            np.ndarray: The initialized weights.
+            np.ndarray: The Initialised weights.
         """
         if self.weight_init is not None:
             return self.weight_init(shape)
-
 
 # endregion
 
 
 # region Layer2D
 class Layer2D(Layer):
+    """Abstract Base Class for 2D Layers. NP arrays are expected in NCHW
+    format.
+
+    This class serves as the base class for all 2D layers in a neural network.
+    It extends the base Layer class with additional functionality specific to
+    2D layers.
     """
-    Abstract Base Class for 2D Layers. NP arrays are expected in NCHW format.
-    """
+
     def __init__(
-        self, stride: int = 1, padding: int = 0, name: str = "Layer2D", weight_init: Optional[Callable] = None
+        self,
+        stride: int = 1,
+        padding: int = 0,
+        name: str = "Layer2D",
+        weight_init: Optional[Callable] = None,
     ) -> None:
-        """
-        Initialize the 2D layer.
+        """Initialise the 2D layer.
+
         Args:
             stride (int, optional): The stride of the layer. Defaults to 1.
             padding (int, optional): The padding of the layer. Defaults to 0.
             name (str, optional): The name of the layer. Defaults to "Layer2D".
-            weight_init (Optional[Callable]): A function to initialize the weights.
+            weight_init (Optional[Callable]): A function to initialise the
+                                              weights.
         """
         super().__init__(name, weight_init)
         self.stride = stride
@@ -117,8 +129,7 @@ class Layer2D(Layer):
 
     @abstractmethod
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
-        """
-        Perform the forward pass of the layer.
+        """Perform the forward pass of the layer.
 
         Args:
             x (np.ndarray): The input to the layer.
@@ -132,8 +143,7 @@ class Layer2D(Layer):
 
     @abstractmethod
     def backward(self, dout: np.ndarray) -> np.ndarray:
-        """
-        Perform the backward pass of the layer.
+        """Perform the backward pass of the layer.
 
         Args:
             dout (np.ndarray): The upstream gradient.
@@ -146,8 +156,7 @@ class Layer2D(Layer):
     def output_shape(
         self, input_shape: Tuple[int, int, int, int]
     ) -> Tuple[int, int, int, int]:
-        """
-        Compute the output shape given the input shape.
+        """Compute the output shape given the input shape.
 
         Args:
             input_shape (Tuple[int, int, int, int]): The shape of the input.
@@ -160,32 +169,27 @@ class Layer2D(Layer):
         out_W = 1 + (W + 2 * self.padding - 1) // self.stride
 
         return (N, C, out_H, out_W)
-    
 
     def params(self) -> dict[str, np.ndarray]:
-        """
-        Define the parameters of the 2D layer.
+        """Define the parameters of the 2D layer.
 
         Returns:
-            dict[str, np.ndarray]: An empty dictionary since base 2D layers
-                                   may not have learnable parameters.
+            dict[str, np.ndarray]: An empty dictionary since base 2D layers may
+                                   not have learnable parameters.
         """
         return {}
 
     def grads(self) -> dict[str, np.ndarray]:
-        """
-        Define the gradients of the 2D layer.
+        """Define the gradients of the 2D layer.
 
         Returns:
-            dict[str, np.ndarray]: An empty dictionary since base 2D layers
-                                   may not have learnable gradients.
+            dict[str, np.ndarray]: An empty dictionary since base 2D layers may
+                                   not have learnable gradients.
         """
         return {}
 
-
     def pad_input(self, x: np.ndarray) -> np.ndarray:
-        """
-        Pad the input array.
+        """Pad the input array.
 
         Args:
             x (np.ndarray): The input array.
@@ -209,8 +213,7 @@ class Layer2D(Layer):
             return x
 
     def unpad_input(self, x: np.ndarray) -> np.ndarray:
-        """
-        Unpad the input array.
+        """Unpad the input array.
 
         Args:
             x (np.ndarray): The input array.
@@ -219,9 +222,8 @@ class Layer2D(Layer):
             np.ndarray: The unpadded input array.
         """
         if self.padding > 0:
-            return x[:, :, self.padding : -self.padding, self.padding : -self.padding]
+            return x[:, :, self.padding:-self.padding,
+                     self.padding:-self.padding]
         else:
             return x
-
-
 # endregion
