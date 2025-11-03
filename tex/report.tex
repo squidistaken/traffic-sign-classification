@@ -220,7 +220,7 @@ The lsos function and optimiser remains the same, however, other key components 
 
 
 
-
+  
 \subsection{Training Procedure}
 
 
@@ -241,24 +241,39 @@ with $N_c$ the number of samples in class $c$ and $K$ the total number of classe
   \label{class-distribution}
 \end{figure}
 
-- Cross-validation setup, train/test split.
+The dataset is filtered to include only the chosen classes:
+\begin{itemize}
+  \item 1: Speed limit (30 km/h);
+  \item 2: Speed limit (50 km/h);
+  \item 10: No passing for vehicles over 3.5 t;
+  \item 13: Stop;
+  \item 38: Go straight or left.
+\end{itemize}
+
+The indices of the samples belonging to these classes are collected, shuffled, and clipped to a maximum of 2500 samples per class. Shuffling ensures that the data is randomized, avoiding any bias that might be present if the data was ordered in a particular way. Clipping to a maximum of 2500 samples per class ensures that the dataset is balanced, preventing the model from being biased towards classes with more samples.
+
+The labels are mapped to new indices and one-hot encoded, and the filtered dataset is saved to a CSV file named \texttt{filtered\_labels\_encoded.csv}. The dataset is split into training and testing sets, with 85\% of the data used for training and the remaining 15\% for testing, matching the original split in the original CNN model, but also as a good practice.
+
+
+
+- Cross-validation setup
 - Hyperparameters and how you chose them.
 
 \section{Results}
 Unfortunately, we are not able to report significant results. The model achieved a test accuracy of xx\%, which is not better than random guessing (20\% for 5 classes). We believe this is because the model does not have enough parameters, so it is not able to learn the features of the dataset well enought to generalize (or even recognize the training data). However, we are unable to significanly increase the model size due to computational constraints, as our implementation is not optimized for speed like libraries such as PyTorch or TensorFlow. Training larger models takes a very long time, and we were not able to complete training runs for larger models within the project timeframe and our personal hardware constraints.
 
 
-
 \begin{itemize}
   \item Performance metrics (accuracy, MSE, etc.)
   \item Learning curves or confusion matrices
   \item Compare with baseline(s)
+  \item Compare against PyTorch
 \end{itemize}
 
 \section{Discussion}
 As evident by our results, the model didn't achieve quite as well as we hoped it would. Despite these lacking results, we still learned a lot throughout this project. First, we learned that architecture matters a lot for these types of projects. The original LeNet CNN \citet{LeCun-1998} is quite small, and designed for small classification tasks (e.g. MNIST). We think that this architecture does not quite suit a bigger, more complex dataset, like GTSRB, which contains a lot more variation in the types of classes and imagery. We argue that a bigger model would be required, with more layers or neurons. Furthermore, we also realized the importance of proper data exploration, and in turn create a more extensive pipeline. 
 
-We think that the main reason that the model did not achieve a high accuracy is due to its small nature. We argue that a model with more layers or more neurons would have been able to capture the details better, resulting in better generalization and a higher accuracy. Additionally, different preprocessing steps could have resulted in a different performance. We note that the shape we are resizing all images to (32 x 32 pixels) is quite small, and images could have potentially lost a lot of important, differentiating features in this process. Other steps could have potentially be used more carefully, which might influence the model's robustness and ability to learn from the images.
+We think that the main reason that the model did not achieve a high accuracy is due to its small nature. We argue that a model with more layers or more neurons would have been able to capture the details better, resulting in better generalization and a higher accuracy. Additionally, different preprocessing steps could have resulted in a different performance. We note that the shape we are resizing all images to (28 x 28 pixels) is quite small, and images could have potentially lost a lot of important, differentiating features in this process. Other steps could have potentially be used more carefully, which might influence the model's robustness and ability to learn from the images.
 
 We do not see a lot of future potential for this project. Although writing a neural network from scratch was a ton of fun, and we learned a lot from doing so, it is not very practical to do this for other machine learning projects. Using pre-built machine learning libraries, like PyTorch, Keras or TensorFlow speed up the process of building a neural network tremendously. For that reason, we argue that just using these libraries instead is a better practice, as these are used a lot in machine learning projects. 
 
