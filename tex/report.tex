@@ -290,7 +290,7 @@ We introduced cross-validation to better evaluate the hyperparameters of the alg
     \item For each fold, one subset of the fold was used for validation, leaving $k - 1$ folds for the training set.
 \end{enumerate}
 
-After the k-fold splitting was done, cross-validation would load the training and validation indices into separate data loaders, where the training indices were shuffled and the validation indices were not. Our k-fold cross validation algorithm re-initializes the model and the optimizer every fold, preventing any form of leakage. 
+After the k-fold splitting was done, cross-validation would load the training and validation indices into separate data loaders, where the training indices were shuffled and the validation indices were not. Our k-fold cross validation algorithm re-initializes the model and the optimizer every fold, preventing any form of leakage. The performance of an algorithm is then simply the mean of the performance across all folds' test sets.
 
 Hyperparameter search was also introduced along with the cross-validation algorithm. Here, we only considered the learning rate and weight decay, as other hyperparameters were picked by following the original LeNet model. The values were chosen in pairs based on some initial experiments. A simple grid search was performed, where would look for the hyperparameters used to train a model with the highest accuracy.
 
