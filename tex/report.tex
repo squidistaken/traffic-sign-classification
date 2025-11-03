@@ -282,13 +282,22 @@ The indices of the samples belonging to these classes are collected, shuffled, a
 
 The labels are mapped to new indices and one-hot encoded, and the filtered dataset is saved to a CSV file named \texttt{filtered\_labels\_encoded.csv}. The dataset is split into training and testing sets, with 85\% of the data used for training and the remaining 15\% for testing, matching the original split in the original CNN model. This allows us to compare hyperparameters by training on the training set with different settings and evaluating on the test set. Mixing these would cause data leakage and increase the danger of overfitting.
 
+We introduced cross-validation to better evaluate the generalization of the model. In specific, k-fold cross-validation was implemented: 
 
+\begin{enumerate}
+    \item Shuffling dataset indices using a fixed seed.
+    \item Splitting those indices into $k$ folds with roughly the same size.
+    \item For each fold, one subset of the fold was used for validation, leaving $k - 1$ folds for the training set.
+\end{enumerate}
 
-- Cross-validation setup
-- Hyperparameters and how you chose them.
+After the k-fold splitting was done, cross-validation would load the training and validation indices into separate data loaders, where the training indices were shuffled and the validation indices were not. Our k-fold cross validation algorithm re-initializes the model and the optimizer every fold, preventing any form of leakage. 
+
+Hyperparameter search was also introduced along with the cross-validation algorithm. Here, we only considered the learning rate and weight decay, as other hyperparameters were picked by following the original LeNet model. The values were chosen in pairs based on some initial experiments. A simple grid search was performed, where would look for the hyperparameters used to train a model with the highest accuracy.
+
+We note that although implemented, we did not get to use our k-fold cross-validation or hyperparameter search, due to insignificant improvement over epochs. However, implementation of cross-validation remains for reproducibility and potential future use.
 
 \section{Results}
-Unfortunately, we are not able to report significant results. The model achieved a test accuracy of 20.0\%, which is not better than random guessing (for 5 classes). We believe this is because the model does not have enough parameters, so it is not able to learn the features of the dataset well enought to generalize (or even recognize the training data). However, we are unable to significanly increase the model size due to computational constraints, as our implementation is not optimized for speed like libraries such as PyTorch or TensorFlow. Training larger models takes a very long time, and we were not able to complete training runs for larger models within the project timeframe and our personal hardware constraints.
+Unfortunately, we are not able to report significant results. The model achieved a test accuracy of 20.02\%, which is not better than random guessing (for 5 classes). We believe this is because the model does not have enough parameters, so it is not able to learn the features of the dataset well enought to generalize (or even recognize the training data). However, we are unable to significanly increase the model size due to computational constraints, as our implementation is not optimized for speed like libraries such as PyTorch or TensorFlow. Training larger models takes a very long time, and we were not able to complete training runs for larger models within the project timeframe and our personal hardware constraints.
 
 At this stage we would like to report metrics like MSE, which is defined by
 \begin{equation}
