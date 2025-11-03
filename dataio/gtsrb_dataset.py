@@ -13,17 +13,18 @@ class GTSRBDataset:
     including handling images and labels, applying transformations, and
     supporting caching.
     """
+
     def __init__(
         self,
         root: str = "./data/gtsrb/",
         x_dir: str = "images/",
         labels: str = "labels.csv",
         indices: List[int] = [],
-        split: Literal["train", "val", "test"] = None,
-        transforms: Optional[Callable] = None,
+        split: Literal["train", "val", "test"] | None = None,
+        transforms: Callable | None = None,
         for_torch: bool = False,
         cache: bool = False,
-        num_workers: int = 4
+        num_workers: int = 4,
     ) -> None:
         """Initialise the GTSRB dataset.
 
