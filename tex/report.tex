@@ -280,7 +280,7 @@ The dataset is filtered to include only the chosen classes:
 
 The indices of the samples belonging to these classes are collected, shuffled, and clipped to a maximum of 2500 samples per class. Shuffling ensures that the data is randomized, avoiding any bias that might be present if the data was ordered in a particular way. Clipping to a maximum of 2500 samples per class ensures that the dataset is balanced, preventing the model from being biased towards classes with more samples.
 
-The labels are mapped to new indices and one-hot encoded, and the filtered dataset is saved to a CSV file named \texttt{filtered\_labels\_encoded.csv}. The dataset is split into training and testing sets, with 85\% of the data used for training and the remaining 15\% for testing, matching the original split in the original CNN model, but also as a good practice.
+The labels are mapped to new indices and one-hot encoded, and the filtered dataset is saved to a CSV file named \texttt{filtered\_labels\_encoded.csv}. The dataset is split into training and testing sets, with 85\% of the data used for training and the remaining 15\% for testing, matching the original split in the original CNN model. This allows us to compare hyperparameters by training on the training set with different settings and evaluating on the test set. Mixing these would cause data leakage and increase the danger of overfitting.
 
 
 
