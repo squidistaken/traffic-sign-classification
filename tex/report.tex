@@ -246,8 +246,8 @@ The dataset is filtered to include only the chosen classes:
   \item 1: Speed limit (30 km/h);
   \item 2: Speed limit (50 km/h);
   \item 10: No passing for vehicles over 3.5 t;
-  \item 13: Stop;
-  \item 38: Go straight or left.
+  \item 13: Give right of way;
+  \item 38: Pass this sign on the right.
 \end{itemize}
 
 The indices of the samples belonging to these classes are collected, shuffled, and clipped to a maximum of 2500 samples per class. Shuffling ensures that the data is randomized, avoiding any bias that might be present if the data was ordered in a particular way. Clipping to a maximum of 2500 samples per class ensures that the dataset is balanced, preventing the model from being biased towards classes with more samples.
