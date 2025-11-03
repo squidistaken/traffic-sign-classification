@@ -13,8 +13,7 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,fit,shapes.multipart,calc}
-
+\usetikzlibrary{arrows.meta,positioning,fit,shapes.multipart,calc,fit}
 
 % Better referencing
 \usepackage{hyperref}
@@ -33,7 +32,7 @@
 % Title info
 \title{Semester Project Report \\ \large Neural Networks (AI)}
 \author{
-  Team Members: David van Wuijkhuijse (s5592968), Marcus Harald Olof Persson (s5343798), Richard Frank Harnisch (s5238366) \\
+  Team Members: David van Wuijkhuijse (s5592968), \\Marcus Harald Olof Persson (s5343798), \\Richard Frank Harnisch (s5238366) \\
   University of Groningen
 }
 \date{\today}
@@ -138,7 +137,11 @@ To begin, we preprocess the data. For this purpose, we have developed a suite of
   \item \texttt{ToResize}: Resizes images to a specified square size using bicubic interpolation. This is so the images can be fed into the model which requires a fixed input size.
   \item \texttt{ToCenterCrop}: Crops a square out of the center of an image to a specified pixel size.
   \item \texttt{ToGrayscale}: Converts RGB images to grayscale using the ITU-R
-        601-2 luma transform\footnote{The formula for each pixel value $L$ in the grayscale image is $L = \frac{1}{1000}(299 R + 587 G + 114 B)$, where $R$, $G$, and $B$ are the red, green, and blue pixel values, respectively.} implemented by the PIL library. We then convert back to RGB by duplicating the grayscale channel three times, as the network expects three channels.
+        601-2 luma transform using the formula
+        \begin{equation}
+          L = \frac{1}{1000}(299 R + 587 G + 114 B),
+        \end{equation}
+        where $R$, $G$, and $B$ are the red, green, and blue pixel values, respectively. This is implemented by the PIL library. We then convert back to RGB by duplicating the grayscale channel three times, as the network expects three channels.
   \item \texttt{ToTensor}: Converts images from numpy arrays to PyTorch tensors and permutes the dimensions from (H, W, C) to (C, H, W). Also converts pixel values from integers (0-255) to floats (0.0-1.0).
   \item \texttt{ToNormalize}: Centers values around zero by subtracting the mean and sets the standard deviation to one by dividing by the standard deviation for each channel. Per-channel mean and standard deviation are computed on the training set and passed as a parameter to the transform.
   \item \texttt{ToRotate}: Applies random rotations within a specified angle range. Rotate function implemented by the PIL library.
@@ -263,5 +266,91 @@ During writing, the autocomplete feature was used to speed up formulation of sen
   \caption{GTSRB data pipeline from download \(\rightarrow\) dataset \(\rightarrow\) transforms \(\rightarrow\) dataloader \(\rightarrow\) training.}
   \label{fig:pipeline}
 \end{figure}
+
+
+\begin{figure}[ht]
+  \centering
+  \resizebox{\linewidth}{!}{%
+    \begin{tikzpicture}[
+        >=Stealth, line join=round, line cap=round,
+        font=\scriptsize, x=1cm, y=1cm,
+        fcbox/.style={draw, rounded corners, minimum width=7mm, minimum height=28mm, fill=purple!10},
+        lbl/.style={font=\scriptsize, inner sep=1pt}
+      ]
+      % ---- helpers ----
+      \def\dx{0.16}   % layer stack x-offset
+      \def\dy{0.12}   % layer stack y-offset
+      \newcommand{\maps}[6]{% x, y, w, h, color, lastIndex
+        \begin{scope}[shift={(#1,#2)}]
+          \foreach \i in {0,...,#6} {
+              \draw[draw=#5!70!black, fill=#5!35] (\i*\dx,-\i*\dy) rectangle ++(#3,#4);
+            }
+        \end{scope}
+      }
+
+      %==================== ROW 1: first four steps ====================
+      \def\yA{0} % y for first row
+
+      % 1) Input (3)
+      \maps{0}{\yA}{4.0}{3.0}{gray}{2}
+      \node[lbl] at (2,\yA+3.25) {$3$};
+
+      % 2) Conv5x5 → 6
+      \maps{5}{\yA+0.6}{3.2}{2.4}{blue}{5}
+      \node[lbl] at (6.6,\yA+3.25) {$6$};
+
+      % 3) MaxPool2x2
+      \maps{9.7}{\yA+1.8}{1.6}{1.2}{teal}{5}
+
+      % 4) Conv5x5 → 16
+      \maps{12.8}{\yA+2.2}{1.2}{0.8}{blue}{15}
+      \node[lbl] at (13.4,\yA+3.25) {$16$};
+
+
+      %==================== ROW 2: last five steps =====================
+      \def\yB{-2.5} % y for second row (spaced below)
+      \def\xStart{0} % left start for second row
+
+      % 5) MaxPool2x2
+      \maps{\xStart}{\yB}{0.6}{0.4}{teal}{15}
+
+      % 6) Flatten (thin slab)
+      \draw[fill=orange!30, draw=orange!60!black] (\xStart+5.1,\yB-1.2) rectangle ++(0.25,2.4);
+
+      % 7) FC 120
+      \node[fcbox] (fc1) at (\xStart+8.4,\yB) {$120$};
+      % 8) FC 84
+      \node[fcbox, minimum height=24mm] (fc2) at (\xStart+11.8,\yB) {$84$};
+      % 9) FC 5 (logits)
+      \node[fcbox, minimum height=18mm, fill=red!10] (fc3) at (\xStart+15.1,\yB) {$5$};
+
+
+      % small ReLU markers (triangles) after convs and FCs
+      \foreach \x/\y in {
+          9.2/\yA+1.2,
+          16/\yA+2,
+          \xStart/\yB-1,
+          \xStart+10/\yB,
+          \xStart+13.4/\yB
+        } {
+          \draw[black, thick] (\x,\y) -- ++(0.2,0) -- ++(0.14,0.14);
+        }
+
+      % labels for minimal cues (kept tiny)
+      \node[lbl] at (7.5,\yA-0.3) {$5 \times 5$ Conv};
+      \node[lbl] at (11.3,\yA+0.9) {$2 \times 2$ Pool};
+      \node[lbl] at (15.8,\yA+0.1) {$5 \times 5$ Conv};
+      \node[lbl] at (\xStart+2.7,\yB-2.1) {$2 \times 2$ Pool};
+      \node[lbl] at (\xStart+5.2,\yB-1.4) {Flatten};
+      \node[lbl] at (\xStart+8.4,\yB-1.6) {FC};
+      \node[lbl] at (\xStart+11.8,\yB-1.4) {FC};
+      \node[lbl] at (\xStart+15.1,\yB-1.1) {FC};
+
+    \end{tikzpicture}%
+  }
+  \caption{Visual representation of our model architecture. The presence of a small ReLU marker indicates a ReLU activation after that layer.}
+\end{figure}
+
+
 
 \end{document}
