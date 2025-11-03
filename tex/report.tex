@@ -161,6 +161,10 @@ For a diagram of the full data pipeline, see Figure \ref{fig:pipeline} in Append
 - Hyperparameters and how you chose them.
 
 \section{Results}
+Unfortunately, we are not able to report significant results. The model achieved a test accuracy of xx\%, which is not better than random guessing (20\% for 5 classes). We believe this is because the model does not have enough parameters, so it is not able to learn the features of the dataset well enought to generalize (or even recognize the training data). However, we are unable to significanly increase the model size due to computational constraints, as our implementation is not optimized for speed like libraries such as PyTorch or TensorFlow. Training larger models takes a very long time, and we were not able to complete training runs for larger models within the project timeframe and our personal hardware constraints.
+
+
+
 \begin{itemize}
   \item Performance metrics (accuracy, MSE, etc.)
   \item Learning curves or confusion matrices
