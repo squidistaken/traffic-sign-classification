@@ -124,9 +124,27 @@ We load the data as a numpy array of shape (H, W, C) for each image, where H is 
   \item Any preprocessing or cleaning
 \end{itemize}
 
+Data is downloaded and cleaned automatically using the \texttt{dataio/gtsrb\_download.py} script. This script downloads the zipped dataset (three files: training dataset including labels, test dataset, test dataset labels), merges all images into one folder, and creates one master CSV file with all labels. It then deleted the zip files unless a parameter is set to keep them, as well as cleans the folder structure to remove unnecessary files (dataset text info files) and now empty folders. The data is freely hosted online by the University of Copenhagen Electronic Research Data Archive.
+
+We implement a GTSRB dataset class in \texttt{dataio/gtsrb\_dataset.py}. This class handles loading the images and labels from disk, applying any specified transforms, and providing access to individual samples. This is meant as a minimal implementation of the PyTorch Dataset class. The dataset provides access to a length attribute (number of samples) and a getitem method to retrieve individual samples by index (returns a tuple of image and label). The dataset class also supports caching of images in memory for faster access during training, as well as multiple worker threads for parallel loading of data. These performance optimizations were implemented later in the project after initial tests showed slow training.
+
 \section{Methods and Experiments}
 \subsection{Pipeline Overview}
 Diagram or list of your full pipeline: preprocessing, model, optimization.
+
+To begin, we preprocess the data. For this purpose, we have developed a suite of modular transform classes implemented in \texttt{transforms.py}. Each class implements a \texttt{\_\_call\_\_} method, allowing instances of these classes to be used as callable functions that apply specific transformations to input images. This design enables easy composition of multiple transformations into a single pipeline using the \texttt{ToCompose} class, which sequentially applies a list of transform instances to an image. On top of this, the following classes are implemented:
+\begin{itemize}
+  \item \texttt{ToResize}: Resizes images to a specified square size using bicubic interpolation. This is so the images can be fed into the model which requires a fixed input size.
+  \item \texttt{ToCenterCrop}: Crops a square out of the center of an image to a specified pixel size.
+  \item \texttt{ToGrayscale}: Converts RGB images to grayscale using the ITU-R
+        601-2 luma transform\footnote{The formula for each pixel value $L$ in the grayscale image is $L = \frac{1}{1000}(299 R + 587 G + 114 B)$, where $R$, $G$, and $B$ are the red, green, and blue pixel values, respectively.} implemented by the PIL library. We then convert back to RGB by duplicating the grayscale channel three times, as the network expects three channels.
+  \item \texttt{ToTensor}: Converts images from numpy arrays to PyTorch tensors and permutes the dimensions from (H, W, C) to (C, H, W). Also converts pixel values from integers (0-255) to floats (0.0-1.0).
+  \item \texttt{ToNormalize}: Centers values around zero by subtracting the mean and sets the standard deviation to one by dividing by the standard deviation for each channel. Per-channel mean and standard deviation are computed on the training set and passed as a parameter to the transform.
+  \item \texttt{ToRotate}: Applies random rotations within a specified angle range. Rotate function implemented by the PIL library.
+  \item \texttt{ToRandomNoise}: Adds Gaussian noise to images with a specified mean and standard deviation. Normal distribution is sampled using numpy.
+\end{itemize}
+
+Data is loaded using the Dataloader class, implemented in \texttt{dataio/dataloader.py}. This class handles batching, shuffling, and parallel loading of data using multiple worker threads. When constructing a DataLoader, we specify the dataset to load from, batch size, whether to shuffle the data at the start of each epoch, whether to drop the last batch if it is imcomplete, the seed for shuffling, an optional custom function to collate samples into batches, how many batches to prefetch, and the number of worker threads for parallel loading. The DataLoader provides an iterator interface to loop over batches of data during training. The class also provides a default collating function that stacks images and labels into tensors. The DataLoader uses a thread pool executor to load batches in parallel, improving performance when using multiple workers. This was also implemented after slow initial training.
 
 \subsection{Model Description}
 - Architecture (MLP, CNN, etc.), with math or pseudocode if needed.
