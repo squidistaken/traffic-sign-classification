@@ -221,6 +221,54 @@ In our modern CNN recreation:
 \begin{itemize}
   \item \textbf{Input Layer:} The input layer takes images with three channels, which are first converted to grayscale and resized to $28\ times 28$ pixels. The images are then normalized with a mean of $0.5$ and a standard deviation of $0.5$ for each channel. This is similar to the original model, which also focused on capturing essential features in a standardized size.
   \item \textbf{Convolutional Layers (C1, C2):} These layers extract features from the input image using convolutional operations with different kernel sizes and numbers of feature maps. The first convolutional layer (C1) takes input with 3 channels and produces 6 output channels using a kernel size of 5$\times$5 with a stride of 1 and no padding. The second convolutional layer (C2) takes input with 6 channels and produces 16 output channels using a kernel size of 5$\times$5 with a stride of 1 and no padding.
+  \item \textbf{Max Pooling Layers (S1, S2):} TheThe architecture of the CNN is modeled after the original 1998 CNN (\cite{LeCun-1998}) designed for handwritten digit recognition. With layers:
+
+\begin{itemize}
+  \item \textbf{Input Layer:} The input layer takes 32$\times$32 pixel images. In the original model, characters were centered in a 28$\times$28 field within a 32$\times$32 input. This helps capture the essential features of the characters in a standard size.
+  \item \textbf{Convolutional Layers (C1, C3, C5):} These layers extract features from the input image using convolutional operations with different kernel sizes and numbers of feature maps. The first convolutional layer (C1) detect simple features like edges, while deeper layers (C3, C5) detect more complex features.
+  \item \textbf{Subsampling Layers (S2, S4):} These layers reduce the spatial resolution of the feature maps through subsampling, often called pooling. This reduces data dimensionality and makes the network invariant to small translations of the input image, which is important for recognizing handwritten digits that can vary slightly in position and scale.
+  \item \textbf{Fully Connected Layer (F6):} This layer is fully connected to the previous layer and has 84 units. It integrates the features extracted by the convolutional and subsampling layers to make a final classification.
+\end{itemize}
+
+Other key components include:
+
+\begin{itemize}
+  \item \textbf{Loss Function (MSE):} The loss function used was Mean Squared Error (MSE), which measures the difference between the desired output and the output produced by the system. MSE is defined as:
+  \begin{equation}
+    \text{MSE} = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2
+  \end{equation}
+  where \( N \) is the number of samples, $y_i$ is the observed value, and $\hat{y}_i$ is the predicted value. MSE is a common choice for regression tasks and was chosen for its simplicity and effectiveness in minimizing the error between predicted and actual values.
+
+  \item \textbf{Optimizer (Momentum-based SGD):} The optimizer used was a momentum-based Stochastic Gradient Descent (SGD) algorithm. The momentum term helps accelerate the gradient vectors in the right directions, leading to faster convergence. The update rule for momentum-based SGD is given by:
+  \begin{equation}
+    v_t = \gamma v_{t-1} + \eta \nabla_W E(W) \\
+  \end{equation}
+  \begin{equation}
+    W = W - v_t
+  \end{equation}
+  where $\gamma$ is the momentum term, $\eta$ is the learning rate, $v_t$ is the update vector at time step $t$, and $\nabla_W E(W)$ is the gradient of the loss function with respect to the weights. The momentum term helps smooth out the updates and avoid oscillations, useful in deep networks.
+
+  \item \textbf{Activation Function (Sigmoid):} The activation function used was the sigmoid function, defined as:
+  \begin{equation}
+    \sigma(x) = \frac{1}{1 + e^{-x}}
+  \end{equation}
+  where $x$ is the input to the activation function. The sigmoid function introduces non-linearity into the model, allowing it to learn complex patterns. It maps any input value to a value between 0 and 1, which can be interpreted as a probability.
+
+  \item \textbf{Weight Initialization:} The weights were initialised using the method "LeCun initialisation." This method was designed to preserve the variance of neural activations during the forward pass and is particularly suited for activations like the hyperbolic tangent (tanh). The weights are typically initialized from a normal distribution with mean 0 and variance $\frac{1}{n}$, where $n$ is the number of inputs to the layer:
+  \begin{equation}
+    W \sim \mathcal{N}\left(0, \frac{1}{n}\right)
+  \end{equation}
+  or from a uniform distribution within the range $\left(-\frac{1}{\sqrt{n}}, \frac{1}{\sqrt{n}}\right)$:
+  \begin{equation}
+    W \sim \mathcal{U}\left(-\frac{1}{\sqrt{n}}, \frac{1}{\sqrt{n}}\right)
+  \end{equation}
+\end{itemize}
+
+In our modern CNN recreation:
+
+\begin{itemize}
+  \item \textbf{Input Layer:} The input layer takes images with three channels, which are first converted to grayscale and resized to $28\ times 28$ pixels. The images are then normalized with a mean of $0.5$ and a standard deviation of $0.5$ for each channel. This is similar to the original model, which also focused on capturing essential features in a standardized size.
+  \item \textbf{Convolutional Layers (C1, C2):} These layers extract features from the input image using convolutional operations with different kernel sizes and numbers of feature maps. The first convolutional layer (C1) takes input with 3 channels and produces 6 output channels using a kernel size of 5$\times$5 with a stride of 1 and no padding. The second convolutional layer (C2) takes input with 6 channels and produces 16 output channels using a kernel size of 5$\times$5 with a stride of 1 and no padding.
   \item \textbf{Max Pooling Layers (S1, S2):} These layers reduce the spatial resolution of the feature maps through subsampling, using a pool size of 2$\times$2 with a stride of 2. This is similar to the subsampling layers in the original model.
   \item \textbf{Flatten Layer:} This layer flattens the output from the previous layer.
   \item \textbf{Fully Connected Layers (F1, F2, F3):} These layers integrate the features extracted by the convolutional and pooling layers to make a final classification. The first fully connected layer (F1) takes 256 input features and produces 120 output features. The second fully connected layer (F2) takes 120 input features and produces 84 output features. The third fully connected layer (F3) takes 84 input features and produces 5 output features. The choice of 84 units in the second fully connected layer is inspired by the original model.
@@ -238,11 +286,30 @@ The lsos function and optimiser remains the same, however, other key components 
     W \sim \mathcal{N}\left(0, \sqrt{\frac{2}{n}}\right)
   \end{equation}
   This is different from the original model, which used LeCun initialization. It is designed for networks with ReLU activation functions. It maintains the variance of activations and gradients across layers, which is essential for effective training. By scaling initial weights appropriately, He initialization ensures consistent variance of activations across layers. This leads to faster convergence during training, maintaining a good balance of activations and gradients from the start.
+\end{itemize}se layers reduce the spatial resolution of the feature maps through subsampling, using a pool size of 2$\times$2 with a stride of 2. This is similar to the subsampling layers in the original model.
+  \item \textbf{Flatten Layer:} This layer flattens the output from the previous layer.
+  \item \textbf{Fully Connected Layers (F1, F2, F3):} These layers integrate the features extracted by the convolutional and pooling layers to make a final classification. The first fully connected layer (F1) takes 256 input features and produces 120 output features. The second fully connected layer (F2) takes 120 input features and produces 84 output features. The third fully connected layer (F3) takes 84 input features and produces 5 output features. The choice of 84 units in the second fully connected layer is inspired by the original model.
+\end{itemize}
+
+The lsos function and optimiser remains the same, however, other key components include:
+\begin{itemize}
+  \item \textbf{Activation Function (ReLU):} The ReLU activation function is defined as:
+  \begin{equation}
+    f(x) = \max(0, x)
+  \end{equation}
+  where $x$ is the input to the activation function. This is a change from the original model, which used sigmoid activation functions. Unlike the original model, which used sigmoid activation functions, ReLU helps mitigate the vanishing gradient problem. The gradient of the ReLU function is either $0$ or $1$, ensuring stable gradient flow during backpropagation. ReLU is also computationally efficient, as it involves simple operations without expensive exponentiation. It leads to sparse activations, meaning fewer neurons are active at any time, helping in learning more efficient representations.
+  \item \textbf{Weight Initialization:} The weights are initialized using He initialization, which is particularly suited for networks with ReLU activation functions. For a layer with $n$ input units, the weights are typically initialized from a normal distribution with mean 0 and variance $\sqrt{\frac{2}{n}}$:
+  \begin{equation}
+    W \sim \mathcal{N}\left(0, \sqrt{\frac{2}{n}}\right)
+  \end{equation}
+  or from a uniform distribution within the range \( \left(-\sqrt{\frac{6}{n}}, \sqrt{\frac{6}{n}}\right) \):
+  \begin{equation}
+    W \sim \mathcal{U}\left(-\sqrt{\frac{6}{n}}, \sqrt{\frac{6}{n}}\right)
+  \end{equation}
+  This is different from the original model, which used LeCun initialization. It is designed for networks with ReLU activation functions. It maintains the variance of activations and gradients across layers, which is essential for effective training. By scaling initial weights appropriately, He initialization ensures consistent variance of activations across layers. This leads to faster convergence during training, maintaining a good balance of activations and gradients from the start.
 \end{itemize}
 
 
-
-  
 \subsection{Training Procedure}
 
 
@@ -291,20 +358,32 @@ Hyperparameter search was also introduced along with the cross-validation algori
 We note that although implemented, we did not get to use our k-fold cross-validation or hyperparameter search. We did run our algorithm, but due to the lack of learning in general changing the hyperparameters had no effects. However, implementation of cross-validation remains for reproducibility and potential future use.
 
 \section{Results}
-Unfortunately, we are not able to report significant results. The model achieved a test accuracy of 20.02\%, which is not better than random guessing (for 5 classes). We believe this is because the model does not have enough parameters, so it is not able to learn the features of the dataset well enought to generalize (or even recognize the training data). However, we are unable to significanly increase the model size due to computational constraints, as our implementation is not optimized for speed like libraries such as PyTorch or TensorFlow. Training larger models takes a very long time, and we were not able to complete training runs for larger models within the project timeframe and our personal hardware constraints.
+Unfortunately, we are not able to report significant results. The model achieved a test accuracy of 19.17\%, which is not better than random guessing (20\% for 5 classes). The test loss was measured at 1.4395, indicating poor performance overall. We believe this is because the model does not have enough parameters, so it is not able to learn the features of the dataset well enought to generalize (or even recognize the training data). However, we are unable to significanly increase the model size due to computational constraints, as our implementation is not optimized for speed like libraries such as PyTorch or TensorFlow. Training larger models takes a very long time, and we were not able to complete training runs for larger models within the project timeframe and our personal hardware constraints.
 
-At this stage we would like to report metrics like MSE, which is defined by
-\begin{equation}
-  \text{MSE} = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2,
-\end{equation}
-confusion matrices, or saliency maps. We did generate these but due to the lack of learning they are not instructive and therefore we will not present them. Our learning curves are similarly uninformative, but we nevertheless include them in Appendix \ref{appendix:materials} for completeness (Figure \ref{fig:learning-curves}).
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/curve.png}
+    \caption{Learning curves for custom CNN implementation showing training loss (left) and accuracy (right) over 30 epochs. The significant fluctuations indicate unstable training dynamics.}
+    \label{fig:custom_curves}
+\end{figure}
 
-\begin{itemize}
-  \item Performance metrics (accuracy, MSE, etc.)
-  \item Learning curves or confusion matrices
-  \item Compare with baseline(s)
-  \item Compare against PyTorch
-\end{itemize}
+As shown in Figure \ref{fig:custom_curves}, the learning curves exhibit significant fluctuations in both loss and accuracy over the epochs, suggesting that the training process was unstable and the model struggled to converge effectively. This instability is likely due to the small size of the model and the complexity of the GTSRB dataset.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/conf_matrix.png}
+    \caption{Confusion matrix for our custom CNN implementation. The matrix reveals substantial misclassifications across all classes, with no clear pattern of correct predictions.}
+    \label{fig:custom_conf}
+\end{figure}
+
+The confusion matrix in Figure \ref{fig:custom_conf} further illustrates the model's difficulties, showing a high number of misclassifications across all classes. This indicates that the model was unable to effectively distinguish between different traffic sign categories.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/saliency.png}
+    \caption{A sample's saliency map from our custom implementation showing which image regions most influenced the model's predictions. The diffuse activation patterns suggest the model failed to learn meaningful features.}
+    \label{fig:custom_saliency}
+\end{figure}
 
 \section{Discussion}
 As evident by our results, the model didn't achieve quite as well as we hoped it would. Despite these lacking results, we still learned a lot throughout this project. First, we learned that architecture matters a lot for these types of projects. The original LeNet CNN \citet{LeCun-1998} is quite small, and designed for small classification tasks (e.g. MNIST). We think that this architecture does not quite suit a bigger, more complex dataset, like GTSRB, which contains a lot more variation in the types of classes and imagery. We argue that a bigger model would be required, with more layers or neurons. Furthermore, we also realized the importance of proper data exploration, and in turn create a more extensive pipeline. 
@@ -313,10 +392,25 @@ We think that the main reason that the model did not achieve a high accuracy is 
 
 We do not see a lot of future potential for this project. Although writing a neural network from scratch was a ton of fun, and we learned a lot from doing so, it is not very practical to do this for other machine learning projects. Using pre-built machine learning libraries, like PyTorch, Keras or TensorFlow speed up the process of building a neural network tremendously. For that reason, we argue that just using these libraries instead is a better practice, as these are used a lot in machine learning projects. 
 
-% what you learnt, why you think some things didn't work, what potential you see for improvement, … whatever flows from your heart after suffering through this project.
+Out of curiosity, we ran the same model through PyTorch for personal fun comparison, which can be found in the appendix.
 
 \section{Conclusion}
-Wrap up: summarize objectives, approach, key findings, and lessons learned.
+
+In this project, we set out to implement a convolutional neural network from scratch to classify traffic signs from the GTSRB dataset. Our implementation followed the original architecture, originally designed for handwritten digit recognition. While our model achieved only modest results (19.17\% accuracy), the process provided valuable insights into the challenges of neural network implementation.
+
+Our approach involved implementing all components of a CNN without relying on established deep learning frameworks. This implementation allowed us to develop a deeper understanding of how neural networks function at a fundamental level.
+
+Some key findings:
+\begin{itemize}
+    \item Architectural limitations: The simple LeNet design proved inadequate for the complexity of traffic sign classification, highlighting the importance of appropriate model selection for specific tasks.
+    \item Implementation challenges: Our unstable training dynamics (Figure \ref{fig:custom_curves}) and poor feature learning (Figure \ref{fig:custom_saliency}) demonstrated the complexity of properly implementing even seemingly simple neural networks.
+    \item Data considerations: Our preprocessing pipeline, particularly the aggressive resizing to 28x28 pixels, likely destroyed important discriminative features in the traffic sign images.
+    \item Performance realities: The significant gap between our implementation and practical performance levels underscored why production systems rely on optimized libraries.
+\end{itemize}
+
+Perhaps the most valuable lesson learned was the appreciation for what established frameworks like PyTorch provide. While our implementation served as an excellent educational exercise, it lacked the robustness and efficiency needed for real-world applications. This experience has given us firsthand understanding of why practitioners typically use these optimized libraries for actual machine learning projects.
+
+Ultimately, this project successfully achieved its educational objectives by revealing both the capabilities and limitations of basic neural network architectures, while providing crucial experience in implementing machine learning systems from the ground up.
 
 \pagebreak
 \bibliography{references}
@@ -494,12 +588,30 @@ During writing, the autocomplete feature was used to speed up formulation of sen
   \caption{Visual representation of the original CNN architecture we replicated. The presence of a small ReLU marker indicates a ReLU activation after that layer.}
 \end{figure}
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.9\textwidth]{images/learning-curves.png}
-  \caption{Loss and accuracy curves during 30 epochs of learning.}
-  \label{fig:learning-curves}
+\section{PyTorch Implementation Comparison}
+For reference, we include results from a PyTorch implementation of the same architecture to highlight performance differences that may stem from implementation details rather than architectural choices.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/curve_torch.png}
+    \caption{Learning curves for PyTorch implementation of the same architecture, showing more stable training dynamics compared to our custom implementation.}
+    \label{fig:torch_curves}
 \end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/conf_matrix_torch.png}
+    \caption{Confusion matrix for PyTorch implementation. Note the improved classification performance compared to Figure \ref{fig:custom_conf}.}
+    \label{fig:torch_conf}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/saliency_torch.png}
+    \caption{A sample's saliency map from PyTorch implementation showing more focused activation patterns compared to our custom version (Figure \ref{fig:custom_saliency}).}
+    \label{fig:torch_saliency}
+\end{figure}
+
 
 
 \end{document}
