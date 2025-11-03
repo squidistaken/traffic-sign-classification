@@ -159,7 +159,7 @@ where $n$ is the batch size, $y_i$ is the true class label for sample $i$, $p_{i
 \begin{equation}
   w_c = \frac{1 / N_c}{\sum_{k=1}^K 1 / N_k}
 \end{equation}
-with $N_c$ the number of samples in class $c$ and $K$ the total number of classes. Unfortunately our class balanced loss function never saw significant application. After realizing that we would not be able to run large-scale training runs, we made several compromises for performance sake. One of them was to train on only five classes, with only 1250 training images per class selected randomly.
+with $N_c$ the number of samples in class $c$ and $K$ the total number of classes. Unfortunately our class balanced loss function never saw significant application. After realizing that we would not be able to run large-scale training runs, we made several compromises for performance sake. One of them was to train on only five classes, with only 2,500 training images per class selected randomly.
 
 \begin{figure}
   \centering
