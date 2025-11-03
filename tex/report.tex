@@ -254,13 +254,9 @@ Other key components include:
   \end{equation}
   where $x$ is the input to the activation function. The sigmoid function introduces non-linearity into the model, allowing it to learn complex patterns. It maps any input value to a value between 0 and 1, which can be interpreted as a probability.
 
-  \item \textbf{Weight Initialization:} The weights were initialised using the method "LeCun initialisation." This method was designed to preserve the variance of neural activations during the forward pass and is particularly suited for activations like the hyperbolic tangent (tanh). The weights are typically initialized from a normal distribution with mean 0 and variance $\frac{1}{n}$, where $n$ is the number of inputs to the layer:
+  \item \textbf{Weight Initialization:} The weights were initialised using the method "LeCun initialisation." This method was designed to preserve the variance of neural activations during the forward pass and is particularly suited for activations like the hyperbolic tangent (tanh). The weights are initialized from a normal distribution with mean 0 and variance $\frac{1}{n}$, where $n$ is the number of inputs to the layer:
   \begin{equation}
     W \sim \mathcal{N}\left(0, \frac{1}{n}\right)
-  \end{equation}
-  or from a uniform distribution within the range $\left(-\frac{1}{\sqrt{n}}, \frac{1}{\sqrt{n}}\right)$:
-  \begin{equation}
-    W \sim \mathcal{U}\left(-\frac{1}{\sqrt{n}}, \frac{1}{\sqrt{n}}\right)
   \end{equation}
 \end{itemize}
 
