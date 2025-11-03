@@ -78,7 +78,7 @@ class Logger:
             train_acc (float): The training accuracy.
         """
         self.logger.info(
-            f"Epoch {epoch + 1}/{num_epochs}, Train Loss: {train_loss:.4f},"
+            f"Epoch {epoch + 1}/{num_epochs}, Train Loss: {train_loss:.4f}, "
             f"Train Accuracy: {train_acc:.4f}"
         )
 
@@ -97,7 +97,7 @@ class Logger:
             val_acc (float): The validation accuracy.
         """
         self.logger.info(
-            f"Epoch {epoch + 1}/{num_epochs},"
+            f"Epoch {epoch + 1}/{num_epochs}, "
             f"Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.4f}"
         )
 
