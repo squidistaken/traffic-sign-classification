@@ -80,8 +80,7 @@ class DataLoader:
 
         return xs, ys
 
-    def _load_batch(self, batch_indices: List[int]
-                    ) -> Tuple[np.ndarray, np.ndarray]:
+    def _load_batch(self, batch_indices: List[int]) -> Tuple[np.ndarray, np.ndarray]:
         """Load a batch of data from the dataset using the given indices.
 
         Args:
@@ -129,8 +128,7 @@ class DataLoader:
 
         # Prefetch initial batches.
         for start in range(
-            0, min(n, (self.prefetch_batches + 1) * self.batch_size),
-            self.batch_size
+            0, min(n, (self.prefetch_batches + 1) * self.batch_size), self.batch_size
         ):
             end = start + self.batch_size
             if end > n:
@@ -140,7 +138,7 @@ class DataLoader:
                     end = n
 
             batch_indices = indices[start:end]
-            future = self.executor.submit(self._load_batch, batch_indices)
+            future = self.executor.submit(self._load_batch, list(batch_indices))
 
             self.prefetch_buffer.append(future)
 
@@ -168,8 +166,9 @@ class DataLoader:
                         next_end = n
 
                 next_batch_indices = indices[next_start:next_end]
-                future = self.executor.submit(self._load_batch,
-                                              next_batch_indices)
+                future = self.executor.submit(
+                    self._load_batch, list(next_batch_indices)
+                )
 
                 self.prefetch_buffer.append(future)
 
