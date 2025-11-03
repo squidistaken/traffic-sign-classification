@@ -149,12 +149,48 @@ For a diagram of the full data pipeline, see Figure \ref{fig:pipeline} in Append
 
 The architecture of the CNN is modeled after the original 1998 CNN (\cite{LeCun-1998}) designed for handwritten digit recognition. With layers:
 
+\paragraph{Input Layer.}
+The input layer takes 32$\times$32 pixel images. In the original model, characters were centered in a 28$\times$28 field within a 32$\times$32 input. This helps capture the essential features of the characters in a standard size.
+
+\paragraph{Convolutional Layers (C1, C3, C5).}
+These layers extract features from the input image using convolutional operations with different kernel sizes and numbers of feature maps. The first convolutional layer (C1) detects simple features like edges, while deeper layers (C3, C5) detect more complex features.
+
+Mathematically, a convolution is an operation that combines two functions to produce a third function expressing how the shape of one is modified by the other. For us, this means sliding a small matrix called a {kernel} or {filter} over the input image and computing a weighted sum at each position. The result is a {feature map} that highlights certain patterns in the input, such as edges, textures, or more complex structures.
+
+Formally, for a 2D input image $I$ and a kernel $K$ of size $(m \times n)$, the convolution operation at position $(i, j)$ is defined as:
+\begin{equation}
+  S(i, j) = (I * K)(i, j) = \sum_{u=0}^{m-1} \sum_{v=0}^{n-1} I(i+u, j+v) \cdot K(u, v)
+\end{equation}
+where $S(i, j)$ is the output feature map at position $(i, j)$, $I(i+u, j+v)$ is the pixel value from the input image, and $K(u, v)$ is the kernel value at position $(u, v)$. In practice, the kernel is moved across the image, and at each location, the sum of the element-wise products is computed. For multiple input channels (RGB), the convolution is performed separately for each channel, and the results are summed to produce a single output feature map.
+
+Convolutional layers learn multiple kernels (filters) during training, each specializing in detecting different features. The output of each kernel is called a feature map, and stacking these maps along the channel dimension allows the network to represent increasingly complex patterns as the depth of the network increases.
+
+Convolutions have several important properties:
 \begin{itemize}
-  \item \textbf{Input Layer:} The input layer takes 32$\times$32 pixel images. In the original model, characters were centered in a 28$\times$28 field within a 32$\times$32 input. This helps capture the essential features of the characters in a standard size.
-  \item \textbf{Convolutional Layers (C1, C3, C5):} These layers extract features from the input image using convolutional operations with different kernel sizes and numbers of feature maps. The first convolutional layer (C1) detect simple features like edges, while deeper layers (C3, C5) detect more complex features.
-  \item \textbf{Subsampling Layers (S2, S4):} These layers reduce the spatial resolution of the feature maps through subsampling, often called pooling. This reduces data dimensionality and makes the network invariant to small translations of the input image, which is important for recognizing handwritten digits that can vary slightly in position and scale.
-  \item \textbf{Fully Connected Layer (F6):} This layer is fully connected to the previous layer and has 84 units. It integrates the features extracted by the convolutional and subsampling layers to make a final classification.
+  \item \textbf{Local connectivity:} Each neuron in the feature map is connected only to a small region of the input, allowing the network to focus on local patterns.
+  \item \textbf{Parameter sharing:} The same kernel is applied across the entire input, greatly reducing the number of parameters compared to fully connected layers.
+  \item \textbf{Translation invariance:} Because the same kernel is used everywhere, the network can detect features regardless of their position in the input.
 \end{itemize}
+
+In our architecture, the first convolutional layer (C1) takes the raw image input and applies several $5 \times 5$ kernels to produce feature maps that highlight basic visual patterns. Subsequent convolutional layers (C3, C5) operate on the outputs of previous layers, enabling the network to build up a hierarchy of features from simple to complex.
+
+\paragraph{Subsampling Layers (S2, S4).}
+Subsampling layers reduce the spatial resolution of the feature maps through subsampling, also known as pooling. Basically, subsampling makes the image smaller by combining multiple pixels into one. Subsampling reduces the dimensionality of the data, which decreases the number of parameters and computations in the network, and helps make the network invariant to small translations and distortions in the input image. In the original LeNet architecture, average pooling (subsampling) is used, where each unit in the subsampled feature map computes the average value over a small local region (e.g., $2 \times 2$ window) of the input feature map, possibly followed by a trainable coefficient and bias.
+
+Mathematically, for an input feature map $X$ and a pooling window of size $k \times k$, the subsampled output $Y$ at position $(i, j)$ is given by:
+\begin{equation}
+  Y(i, j) = \frac{1}{k^2} \sum_{m=0}^{k-1} \sum_{n=0}^{k-1} X(s i + m, s j + n)
+\end{equation}
+where $s$ is the stride (step size) of the pooling operation. This operation reduces the spatial dimensions while retaining the most salient information, making the network more robust to small shifts and distortions in the input.
+
+\paragraph{Fully Connected Layer (F6).}
+This layer is fully connected to the previous layer and has 84 units. It integrates the features extracted by the convolutional and subsampling layers to make a final classification.
+
+Mathematically, the forward pass of a fully connected (dense) layer can be expressed as:
+\begin{equation}
+  \mathbf{y} = \mathbf{W} \mathbf{x} + \mathbf{b}
+\end{equation}
+where $\mathbf{x}$ is the input vector (flattened output from the previous layer), $\mathbf{W}$ is the weight matrix, $\mathbf{b}$ is the bias vector, and $\mathbf{y}$ is the output vector of the fully connected layer. Each output unit computes a weighted sum of all input units plus a bias, enabling the network to learn complex, non-linear combinations of features.
 
 Other key components include:
 
@@ -224,7 +260,7 @@ where $n$ is the batch size, $y_i$ is the true class label for sample $i$, $p_{i
 \begin{equation}
   w_c = \frac{1 / N_c}{\sum_{k=1}^K 1 / N_k}
 \end{equation}
-with $N_c$ the number of samples in class $c$ and $K$ the total number of classes. Unfortunately our class balanced loss function never saw significant application. After realizing that we would not be able to run large-scale training runs, we made several compromises for performance sake. One of them was to train on only five classes, with only 2,500 training images per class selected randomly.
+with $N_c$ the number of samples in class $c$ and $K$ the total number of classes. Unfortunately our class balanced loss function never saw significant application. After realizing that we would not be able to run large-scale training runs, we made several compromises for performance sake. One of them was to train on only five classes, with only 2,500 training images per class selected randomly. Considering using the same number of samples per classe reduces class-balanced loss to standard cross-entropy loss, we did not end up using it.
 
 \begin{figure}
   \centering
@@ -252,8 +288,13 @@ The labels are mapped to new indices and one-hot encoded, and the filtered datas
 - Hyperparameters and how you chose them.
 
 \section{Results}
-Unfortunately, we are not able to report significant results. The model achieved a test accuracy of xx\%, which is not better than random guessing (20\% for 5 classes). We believe this is because the model does not have enough parameters, so it is not able to learn the features of the dataset well enought to generalize (or even recognize the training data). However, we are unable to significanly increase the model size due to computational constraints, as our implementation is not optimized for speed like libraries such as PyTorch or TensorFlow. Training larger models takes a very long time, and we were not able to complete training runs for larger models within the project timeframe and our personal hardware constraints.
+Unfortunately, we are not able to report significant results. The model achieved a test accuracy of 20.0\%, which is not better than random guessing (for 5 classes). We believe this is because the model does not have enough parameters, so it is not able to learn the features of the dataset well enought to generalize (or even recognize the training data). However, we are unable to significanly increase the model size due to computational constraints, as our implementation is not optimized for speed like libraries such as PyTorch or TensorFlow. Training larger models takes a very long time, and we were not able to complete training runs for larger models within the project timeframe and our personal hardware constraints.
 
+At this stage we would like to report metrics like MSE, which is defined by
+\begin{equation}
+  \text{MSE} = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2,
+\end{equation}
+confusion matrices, or saliency maps. We did generate these but due to the lack of learning they are not instructive. They are therefore relegated to Appendix \ref{appendix:materials}.
 
 \begin{itemize}
   \item Performance metrics (accuracy, MSE, etc.)
