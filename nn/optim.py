@@ -1,206 +1,216 @@
+# SGD, Momentum, Adam
 import numpy as np
 from abc import ABC, abstractmethod
-from typing import Tuple, Dict, Any, List
+from typing import Tuple, Dict, Any
+from .layers.base_layers import Layer
 
 
 # region Abstract Optimizer
 class Optimizer(ABC):
-    """Base class for optimisers using a dictionary of parameters.
+    """Abstract base class for all optimizers."""
 
-    This class serves as the base class for all optimizers, providing the
-    interface and common functionality required for optimisation algorithms.
-    """
     def __init__(
         self,
-        raw_params: Dict[str, np.ndarray],
+        raw_params: list[Tuple[Layer, str, np.ndarray]] | list[Dict],
         lr: float = 0.001,
         weight_decay: float = 0.0,
     ) -> None:
-        """Initialise the optimizer with the given parameters.
+        """Initialization of base Optimizer class.
 
         Args:
-            raw_params (Dict[str, np.ndarray]): A dictionary mapping parameter
-                                                names to their corresponding
-                                                arrays.
-            lr (float, optional): The learning rate. Defaults to 0.001.
-            weight_decay (float, optional): The L2 regularization factor.
-                                            Defaults to 0.0.
+            raw_params (list[Tuple[Layer, str, np.ndarray]] | list[Dict]):
+                Either:
+                - An iterable of triples (layer, name, array) where layer is a
+                Layer instance, name is the parameter name (str),
+                and array is the parameter tensor (np.ndarray),
+                - OR a list of 'param groups': dicts with parameters and
+                per-group hyperparameters
+            lr (float): Learning rate. Defaults to 0.001.
+            weight_decay (float): Weight decay (L2 penalty).
+                                  Defaults to 0.0.
         """
-        self.param_groups = self._make_param_groups(raw_params, lr,
-                                                    weight_decay)
-        self.state: Dict[Tuple[None, str], Dict[str, np.ndarray]] = {}
+        self.param_groups = self._make_param_groups(
+            raw_params, lr, weight_decay
+        )
+        self.state = {}  # per-parameter state dictionaries
 
     @abstractmethod
     def step(self) -> None:
-        """Perform a single optimization step.
-
-        This method updates the parameters based on their gradients and the
-        specified optimization algorithm.
-        """
+        """Abstract method for single optimization step."""
         pass
 
     def zero_grad(self) -> None:
-        """Set all gradients to zero.
-
-        This method resets the gradients of all parameters to zero, which is
-        typically called before computing new gradients for the next batch of
-        data.
-        """
+        """Sets all parameter gradients to zero."""
         for group in self.param_groups:
-            for _, name, param in group["params"]:
-                if hasattr(param, "grad") and param.grad is not None:
-                    param.grad.fill(0.0)
+            for layer, name, param in group["params"]:
+                grad = getattr(layer, "grad_" + name)
+                grad.fill(0.0)
 
     def _make_param_groups(
         self,
-        raw_params: Dict[str, np.ndarray],
+        raw_params: list[Tuple[Layer, str, np.ndarray]] | list[Dict],
         lr: float,
         weight_decay: float,
-    ) -> List[Dict[str, Any]]:
-        """Convert a dictionary of parameters into a standard parameter group.
-
-        This method organizes the parameters into groups for optimization,
-        applying the specified learning rate and weight decay.
+    ) -> list[Dict[str, Any]]:
+        """
+        Turns the two types of raw_params inputs
+        into a standardized structure.
 
         Args:
-            raw_params (Dict[str, np.ndarray]): A dictionary mapping parameter
-                                                names to their corresponding
-                                                arrays.
-            lr (float): The learning rate.
-            weight_decay (float): The L2 regularization factor.
+            raw_params (list[Tuple[Layer, str, np.ndarray]] | list[Dict]):
+                Either:
+                - An iterable of triples (layer, name, array) where layer is a
+                Layer instance, name is the parameter name (str),
+                and array is the parameter tensor (np.ndarray),
+                - OR a list of 'param groups': dicts with parameters and
+                per-group hyperparameters
+            lr (float): Learning rate.
+            weight_decay (float): Weight decay (L2 penalty).
 
         Returns:
-            List[Dict[str, Any]]: A list of parameter groups, each containing
-                                  parameters, learning rate, and weight decay.
+            list[Dict[str, Any]]: List of parameter groups in
+                                  a standardized structure.
         """
-        flat_params: List[Tuple[None, str, np.ndarray]] = [
-            (None, name, param) for name, param in raw_params.items()
-        ]
-        return [{"params": flat_params, "lr": lr,
-                 "weight_decay": weight_decay}]
 
+        param_groups = []
+
+        # Handle both possible cases of argument params,
+        # specified in docstring.
+        if isinstance(raw_params, list):
+            # Case 1: params is a list of (layer, name, array) tuples.
+            if all(isinstance(p, tuple) and len(p) == 3 for p in raw_params):
+                param_groups.append({
+                    "params": raw_params,
+                    "lr": lr,
+                    "weight_decay": weight_decay,
+                })
+        # Case 2: params is already a list of a dictionary.
+            elif all(isinstance(p, dict) for p in raw_params):
+                for group in raw_params:
+                    group_copy = group.copy()
+
+                    # Ensure all groups have correct keys by setting deafults.
+                    group_copy.setdefault("lr", lr)
+                    group_copy.setdefault("weight_decay", weight_decay)
+                    param_groups.append(group_copy)
+            else:
+                raise ValueError(
+                    (
+                        "Params must be a list of an iterable of triples "
+                        "(layer, name, array) tuples "
+                        "OR a list of parameter group dictionaries."
+                    )
+                )
+        else:
+            raise ValueError("Params must be a list")
+
+        return param_groups
 # endregion
 
 
 # region SGD Optimizer
 class SGD(Optimizer):
-    """Stochastic Gradient Descent optimiser.
-
-    This class implements the Stochastic Gradient Descent optimisation
-    algorithm, which updates the parameters in the direction opposite to the
-    gradient of the loss function.
-    """
+    """Implements stochastic gradient descent optimizer."""
 
     def step(self) -> None:
-        """Perform a single optimisation step.
+        """Performs a single optimization step."""
 
-        This method updates the parameters using the Stochastic Gradient
-        Descent algorithm, adjusting each parameter by the negative gradient
-        scaled by the learning rate.
-        """
         for group in self.param_groups:
             lr = group["lr"]
             weight_decay = group["weight_decay"]
 
-            for _, name, param in group["params"]:
-                grad = getattr(param, "grad", None)
+            for layer, name, parameters in group["params"]:
+                grad = getattr(layer, "grad_" + name)
 
-                if grad is None:
-                    continue
                 if weight_decay != 0:
-                    grad = grad + weight_decay * param
+                    upd = grad + weight_decay * parameters
+                else:
+                    # Skip unnecessary computations if there's no weight decay.
+                    upd = grad
 
-                param -= lr * grad
-
+                # theta = theta - lr * (grad + weight_decay * theta)
+                parameters -= lr * upd
 # endregion
 
 
 # region Adam Optimizer
 class Adam(Optimizer):
-    """Adam optimiser.
-
-    This class implements the Adam optimisation algorithm, which combines the
-    benefits of AdaGrad and RMSProp, using estimates of both the first and
-    second moments of the gradients.
-    """
+    """Implements the Adam optimizer."""
 
     def step(self) -> None:
-        """Perform a single optimization step.
-
-        This method updates the parameters using the Adam optimization
-        algorithm, which involves computing the moving averages of the
-        gradients and their squares, and then adjusting the parameters
-        accordingly.
-        """
+        """Performs a single optimization step."""
         for group in self.param_groups:
             lr = group["lr"]
             weight_decay = group["weight_decay"]
+            # Get Adam specific parameters from group, else default
             beta1 = group.get("beta1", 0.9)
             beta2 = group.get("beta2", 0.999)
             epsilon = group.get("epsilon", 1e-8)
 
-            for _, name, param in group["params"]:
-                grad = getattr(param, "grad", None)
-
-                if grad is None:
-                    continue
-
+            for layer, name, parameters in group["params"]:
+                grad = getattr(layer, "grad_" + name)
+                # Apply weight decay if not zero
                 if weight_decay != 0:
-                    grad = grad + weight_decay * param
+                    grad = grad + weight_decay * parameters
 
-                if (None, name) not in self.state:
-                    self.state[(None, name)] = {
-                        "m": np.zeros_like(param),
-                        "v": np.zeros_like(param),
+                # Initialize per-parameter state if not there
+                if (layer, name) not in self.state:
+                    self.state[(layer, name)] = {
+                        "m": np.zeros_like(parameters),
+                        "v": np.zeros_like(parameters),
                         "t": 0,
                     }
 
-                state = self.state[(None, name)]
+                state = self.state[(layer, name)]
                 m, v, t = state["m"], state["v"], state["t"]
+
+                # Update biased moment estimates
                 t += 1
                 state["t"] = t
+
                 m[:] = beta1 * m + (1 - beta1) * grad
-                v[:] = beta2 * v + (1 - beta2) * (grad**2)
-                m_hat = m / (1 - beta1**t)
-                v_hat = v / (1 - beta2**t)
-                param -= lr * (m_hat / (np.sqrt(v_hat) + epsilon))
+                v[:] = beta2 * v + (1 - beta2) * (grad ** 2)
+
+                # Compute bias-corrected moment estimates
+                m_hat = m / (1 - beta1 ** t)
+                v_hat = v / (1 - beta2 ** t)
+
+                # Parameter update
+                upd = m_hat / (np.sqrt(v_hat) + epsilon)
+                parameters -= lr * upd
 # endregion
 
 
 # region Momentum Optimizer
 class Momentum(Optimizer):
-    """Stochastic Gradient Descent with momentum.
-
-    This class implements the SGD with momentum optimisation algorithm, which
-    accelerates the gradient vectors in the direction of their moving average,
-    helping to speed up convergence and reduce oscillations.
-    """
+    """Implements the Momentum optimizer."""
 
     def step(self) -> None:
-        """Perform a single optimisation step.
-
-        This method updates the parameters using the Stochastic Gradient
-        Descent with momentum algorithm, which involves computing a moving
-        average of the gradients and adjusting the parameters accordingly.
-        """
+        """Performs a single optimization step."""
         for group in self.param_groups:
             lr = group["lr"]
             weight_decay = group["weight_decay"]
+            # Get parameters specific to Momentum or default
             momentum = group.get("momentum", 0.9)
 
-            for _, name, param in group["params"]:
-                grad = getattr(param, "grad", None)
-
-                if grad is None:
-                    continue
-
+            for layer, name, parameters in group["params"]:
+                grad = getattr(layer, "grad_" + name)
+                # Apply weight decay if not zero
                 if weight_decay != 0:
-                    grad = grad + weight_decay * param
+                    grad = grad + weight_decay * parameters
 
-                if (None, name) not in self.state:
-                    self.state[(None, name)] = {"v": np.zeros_like(param)}
+                # Initialize per-parameter state if not there
+                if (layer, name) not in self.state:
+                    self.state[(layer, name)] = {
+                        "v": np.zeros_like(parameters)
+                    }
 
-                v = self.state[(None, name)]["v"]
+                state = self.state[(layer, name)]
+                v = state["v"]
+
+                # Update velocity
                 v[:] = momentum * v + grad
-                param -= lr * v
+
+                # Parameter update
+                parameters -= lr * v
 # endregion

@@ -125,12 +125,12 @@ def cross_validate(
         # Initialize model and optimizer per fold.
         fold_model = model_fn()
 
-        param_dict = {}
+        param_list = []
         for layer in fold_model.layers:
-            param_list = layer.params()
-            param_dict.update(param_list)
+            for name, param in layer.params().items():
+                param_list.append((layer, name, param))
 
-        optimizer = optimizer_fn(param_dict)
+        optimizer = optimizer_fn(param_list)
 
         # Train.
         train_losses, val_losses, train_accs, val_accs = train(

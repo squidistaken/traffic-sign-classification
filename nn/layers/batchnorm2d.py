@@ -153,7 +153,7 @@ class BatchNorm2D(Layer2D):
         Returns:
             dict: A dictionary mapping parameter names to their gradients.
         """
-        return {"dgamma": self.grad_gamma, "dbeta": self.grad_beta}
+        return {"gamma": self.grad_gamma, "beta": self.grad_beta}
 
     def output_shape(
         self, input_shape: tuple[int, int, int, int]

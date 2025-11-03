@@ -103,7 +103,7 @@ class Linear(Layer):
         Returns:
             dict: A dictionary mapping parameter names to their values.
         """
-        return {"W": self.W, "b": self.b}
+        return {"weights": self.W, "biases": self.b}
 
     def grads(self) -> dict:
         """Return the gradients of the learnable parameters.
@@ -111,7 +111,7 @@ class Linear(Layer):
         Returns:
             dict: A dictionary mapping parameter names to their gradients.
         """
-        return {"dW": self.grad_weights, "db": self.grad_biases}
+        return {"weights": self.grad_weights, "biases": self.grad_biases}
 
     def output_shape(self, input_shape: tuple) -> tuple:
         """Compute the output shape given the input shape.
