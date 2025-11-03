@@ -12,6 +12,9 @@
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{subcaption}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,shapes.multipart,calc}
+
 
 % Better referencing
 \usepackage{hyperref}
@@ -144,7 +147,9 @@ To begin, we preprocess the data. For this purpose, we have developed a suite of
   \item \texttt{ToRandomNoise}: Adds Gaussian noise to images with a specified mean and standard deviation. Normal distribution is sampled using numpy.
 \end{itemize}
 
-Data is loaded using the Dataloader class, implemented in \texttt{dataio/dataloader.py}. This class handles batching, shuffling, and parallel loading of data using multiple worker threads. When constructing a DataLoader, we specify the dataset to load from, batch size, whether to shuffle the data at the start of each epoch, whether to drop the last batch if it is imcomplete, the seed for shuffling, an optional custom function to collate samples into batches, how many batches to prefetch, and the number of worker threads for parallel loading. The DataLoader provides an iterator interface to loop over batches of data during training. The class also provides a default collating function that stacks images and labels into tensors. The DataLoader uses a thread pool executor to load batches in parallel, improving performance when using multiple workers. This was also implemented after slow initial training.
+Data is loaded using the Dataloader class, implemented in \texttt{dataio/dataloader.py}. This class handles batching, shuffling, and parallel loading of data using multiple worker threads. When constructing a DataLoader, we specify the dataset to load from, batch size, whether to shuffle the data at the start of each epoch, whether to drop the last batch if it is imcomplete, the seed for shuffling, an optional custom function to collate samples into batches, how many batches to prefetch, and the number of worker threads for parallel loading. The DataLoader provides an iterator interface to loop over batches of data during training. The class also provides a default collating function that stacks images and labels into tensors. The DataLoader uses a thread pool executor to load batches in parallel, improving performance when using multiple workers. This was also implemented after slow initial training. During training we iterate through the dataloader to get new batches of images and labels.
+
+For a diagram of the full data pipeline, see Figure \ref{fig:pipeline} in Appendix \ref{appendix:materials}.
 
 \subsection{Model Description}
 - Architecture (MLP, CNN, etc.), with math or pseudocode if needed.
@@ -177,9 +182,81 @@ Wrap up: summarize objectives, approach, key findings, and lessons learned.
 \section{Use of AI Tools}
 We used LLM tools during both writing the report and coding. The helper of choice was GitHub Copilot using GPT-4.1. During coding, it was used in EDA for plotting as well as to write non-ML boilerplate code, such as converting .ppm images to a numpy array.
 
-During writing, the autocomplete feature was used to speed up formulation of sentences. The ideas and structure of the report are ours.
+During writing, the autocomplete feature was used to speed up formulation of sentences as well as format figures and charts. The ideas and structure of the report are ours.
 
 \section{Additional Materials}
-Include extra plots, tables, or examples here if needed.
+\label{appendix:materials}
+
+\begin{figure}[ht]
+  \centering
+  \resizebox{\linewidth}{!}{%
+    \begin{tikzpicture}[
+        node distance=8mm,
+        >=Stealth,
+        font=\small,
+        box/.style={draw, rounded corners, align=left, inner sep=4pt, outer sep=0pt, fill=gray!5},
+        io/.style={box, fill=blue!5},
+        proc/.style={box, fill=green!5},
+        group/.style={box, fill=orange!7},
+        note/.style={box, fill=yellow!10, font=\scriptsize},
+        every node/.append style={text width=0.72\linewidth}
+      ]
+
+      % --- Nodes (stacked vertically to stay narrow) ---
+      \node[io] (src) {\textbf{Data Source (UCPH ERDA)}
+        \\Zipped datasets:
+        \\-- Train (+labels)
+        \\-- Test
+        \\-- Test labels};
+
+      \node[proc, below=of src] (dl) {\textbf{\texttt{dataio/gtsrb\_download.py}}
+      \\1) Download three zip files
+      \\2) Merge all images into a single folder
+      \\3) Create master CSV with labels
+      \\4) Delete zips (unless keep=true)
+      \\5) Clean dataset info files \& empty dirs};
+
+      \node[proc, below=of dl] (ds) {\textbf{\texttt{dataio/gtsrb\_dataset.py}}
+        \\-- Minimal PyTorch \texttt{Dataset}: \texttt{\_\_len\_\_}, \texttt{\_\_getitem\_\_}
+        \\-- Loads images \& labels from disk
+        \\-- Optional in-memory caching
+        \\-- Multi-worker loading support};
+
+      % Transforms group
+      \node[group, below=of ds] (tf) {\textbf{\texttt{transforms.py}} \,(Optional, \texttt{ToCompose} applies in order)
+        \\\textit{Available steps:}
+        \\-- \texttt{ToResize}: bicubic to fixed square
+        \\-- \texttt{ToCenterCrop}: square crop (px)
+        \\-- \texttt{ToGrayscale}: ITU-R 601-2 luma, then RGB triplicate
+        \\-- \texttt{ToTensor}: (H,W,C)$\to$(C,H,W), scale 0--1
+        \\-- \texttt{ToNormalize}: per-channel mean/std (from train set)
+        \\-- \texttt{ToRotate}: random angle range (PIL)
+        \\-- \texttt{ToRandomNoise}: Gaussian noise (\(\mu,\sigma\) via NumPy)};
+
+      \node[proc, below=of tf] (dlr) {\textbf{\texttt{dataio/dataloader.py}}
+        \\\texttt{DataLoader}(dataset, batch\_size, shuffle, drop\_last, seed,
+        \\\hspace*{2.2em}collate\_fn, prefetch\_batches, num\_workers)
+        \\-- Batching, shuffling per epoch
+        \\-- Default collate: stack tensors
+        \\-- ThreadPool for parallel batch loading};
+
+      \node[proc, below=of dlr] (train) {\textbf{Training Loop}
+        \\\texttt{for images, labels in DataLoader:}
+        \\\hspace*{1em}\texttt{images} \(\to\) model \(\to\) loss/backprop
+        \\\hspace*{1em}iterate over epochs};
+
+      % --- Arrows ---
+      \draw[->] (src) -- (dl);
+      \draw[->] (dl) -- (ds);
+      \draw[->] (ds) -- node[right, note, xshift=8mm, text width=0.6\linewidth]
+      {Optional: cache images in RAM to speed up later epochs} (tf);
+      \draw[->] (tf) -- (dlr);
+      \draw[->] (dlr) -- (train);
+
+    \end{tikzpicture}%
+  }
+  \caption{GTSRB data pipeline from download \(\rightarrow\) dataset \(\rightarrow\) transforms \(\rightarrow\) dataloader \(\rightarrow\) training.}
+  \label{fig:pipeline}
+\end{figure}
 
 \end{document}
