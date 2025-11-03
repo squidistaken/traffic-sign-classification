@@ -283,7 +283,7 @@ The lsos function and optimiser remains the same, however, other key components 
   \end{equation}
   This is different from the original model, which used LeCun initialization. It is designed for networks with ReLU activation functions. It maintains the variance of activations and gradients across layers, which is essential for effective training. By scaling initial weights appropriately, He initialization ensures consistent variance of activations across layers. This leads to faster convergence during training, maintaining a good balance of activations and gradients from the start.
 \end{itemize}se layers reduce the spatial resolution of the feature maps through subsampling, using a pool size of 2$\times$2 with a stride of 2. This is similar to the subsampling layers in the original model.
-  \item \textbf{Flatten Layer:} This layer flattens the output from the previous layer.
+  \item \textbf{Flatten Layer:} This layer flattens the output from the previous layer by converting the multi-dimensional feature maps into a one-dimensional vector. This is necessary to prepare the data for the fully connected layers that follow.
   \item \textbf{Fully Connected Layers (F1, F2, F3):} These layers integrate the features extracted by the convolutional and pooling layers to make a final classification. The first fully connected layer (F1) takes 256 input features and produces 120 output features. The second fully connected layer (F2) takes 120 input features and produces 84 output features. The third fully connected layer (F3) takes 84 input features and produces 5 output features. The choice of 84 units in the second fully connected layer is inspired by the original model.
 \end{itemize}
 
