@@ -8,7 +8,7 @@ Authors:
 
 * Marcus Harald Olof Persson (s5343798)
 
-* Richard Frank Harnisch
+* Richard Frank Harnisch (s5238366)
 
 ## Project Overview
 
