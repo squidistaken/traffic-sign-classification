@@ -43,7 +43,7 @@
 
 \begin{abstract}
   \noindent
-  We implemented a feed-forward convolutional neural network from the group up including loss, activations, optimizer, and LR scheduler. We trained and evaluated the model on the German Traffic Sign Recognition Benchmark (GTSRB) dataset with 38 classes. Our model achieved a test accuracy of xx\%.
+  We implemented a feed-forward convolutional neural network from the group up including loss, activations, optimizer, and LR scheduler. We trained and evaluated the model on the German Traffic Sign Recognition Benchmark (GTSRB) dataset with 43 classes. Our model achieved a test accuracy of xx\%.
 \end{abstract}
 
 \tableofcontents
@@ -110,13 +110,6 @@ The images themselves are presented as PPM files with varying resolution and asp
   \label{color-histogram}
 \end{figure}
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.9\textwidth]{images/class_distribution.png}
-  \caption{Class distribution of the GTSRB dataset. The dataset is imbalanced, with the smallest class having 270 images and the largest 3000. The mean is 1206 images per class.}
-  \label{class-distribution}
-\end{figure}
-
 We load the data as a numpy array of shape (H, W, C) for each image, where H is height, W is width, and C is the color channel (so three). The labels are loaded as integers corresponding to the class IDs. Before feeding the images to the model, we normalize the pixel values to the range [0, 1] by dividing by 255.
 
 \begin{itemize}
@@ -155,6 +148,25 @@ For a diagram of the full data pipeline, see Figure \ref{fig:pipeline} in Append
 \subsection{Model Description}
 - Architecture (MLP, CNN, etc.), with math or pseudocode if needed.
 - Loss function, optimizer, regularization.
+
+
+
+There is significant class imbalance (see Figure \ref{class-distribution}). The largest class has 3000 example images, while the smallest class only has 270 images. To address this, we implemented a class balanced cross entropy loss, defined as:
+\begin{equation}
+  \mathcal{L} = \frac{1}{\sum_{i=1}^n w_{y_i}} \sum_{i=1}^n w_{y_i} \, \big[ -\log p_{i, y_i} \big]
+\end{equation}
+where $n$ is the batch size, $y_i$ is the true class label for sample $i$, $p_{i, y_i}$ is the predicted probability for the true class, and $w_{y_i}$ is the normalized inverse frequency of class $y_i$:
+\begin{equation}
+  w_c = \frac{1 / N_c}{\sum_{k=1}^K 1 / N_k}
+\end{equation}
+with $N_c$ the number of samples in class $c$ and $K$ the total number of classes. Unfortunately our class balanced loss function never saw significant application. After realizing that we would not be able to run large-scale training runs, we made several compromises for performance sake. One of them was to train on only five classes, with only 1250 training images per class selected randomly.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.9\textwidth]{images/class_distribution.png}
+  \caption{Class distribution of the GTSRB dataset. The dataset is imbalanced, with the smallest class having 270 images and the largest 3000. The mean is 1206 images per class.}
+  \label{class-distribution}
+\end{figure}
 
 \subsection{Training Procedure}
 - Cross-validation setup, train/test split.
